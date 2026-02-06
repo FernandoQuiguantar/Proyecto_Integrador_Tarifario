@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
-import MyButton from './components/MyButton';
-import MyInput from './components/MyInput';
-import Card from './components/Card'; 
+import { useNavigate } from 'react-router-dom';
+import MyButton from '../components/MyButton';
+import MyInput from '../components/MyInput';
+import Card from '../components/Card';
 
-function App() {
+function UsuarioPage() {
+  const navigate = useNavigate();
   const [tarifas, setTarifas] = useState([]);
   const [error, setError] = useState('');
-  
-  // Estado inicial con las dimensiones separadas y unidad de medida
-  const [form, setForm] = useState({ 
-    pieza: '', 
-    ancho: '',      
-    alto: '',       
-    profundidad: '', 
-    unidad: 'cm',   
-    precio_base: '', 
+
+  const [form, setForm] = useState({
+    pieza: '',
+    ancho: '',
+    alto: '',
+    profundidad: '',
+    unidad: 'cm',
+    precio_base: '',
     categoria: 'Digital',
-    imagen_url: '' 
+    imagen_url: ''
   });
 
   const API_URL = 'http://localhost:3000/api/tarifas';
 
-  // Carga inicial de datos desde el Backend
   const fetchTarifas = async () => {
     try {
       const res = await fetch(API_URL);
@@ -34,16 +34,20 @@ function App() {
   };
 
   useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      navigate('/login-usuario');
+      return;
+    }
     fetchTarifas();
-  }, []);
+  }, [navigate]);
 
-  // Función para guardar una nueva pieza
   const handleSave = async () => {
     setError('');
     if (!form.pieza || !form.precio_base) {
       return setError('Nombre y Precio son campos obligatorios');
     }
-    
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -55,19 +59,17 @@ function App() {
         const data = await res.json();
         setError(data.message || "Error al guardar");
       } else {
-        // Reset del formulario tras el éxito
-        setForm({ 
-          pieza: '', ancho: '', alto: '', profundidad: '', 
-          unidad: 'cm', precio_base: '', categoria: 'Digital', imagen_url: '' 
+        setForm({
+          pieza: '', ancho: '', alto: '', profundidad: '',
+          unidad: 'cm', precio_base: '', categoria: 'Digital', imagen_url: ''
         });
-        fetchTarifas(); // Recargamos la lista
+        fetchTarifas();
       }
     } catch (err) {
       setError("No se pudo conectar con el servidor del Tarifario.");
     }
   };
 
-  // Función para eliminar
   const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar este material del catálogo?")) {
       try {
@@ -79,10 +81,15 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-10 font-sans text-gray-800">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* ENCABEZADO ESTILO INSTITUCIONAL */}
         <header className="bg-[#1e3a5f] text-white p-10 rounded-t-3xl flex justify-between items-start relative shadow-2xl">
           <div className="flex-1">
@@ -92,14 +99,24 @@ function App() {
             <p className="text-gray-300 italic text-lg font-medium">
               Desarrollado por: Erick Quiguantar - PUCE
             </p>
+            <p className="text-blue-200 text-sm mt-2 font-semibold">
+              Panel de Usuario
+            </p>
           </div>
-          {/* Logo Shoppingmanagements en recuadro blanco */}
-          <div className="bg-white p-4 rounded-xl shadow-md ml-4 border-2 border-blue-100">
-            <img 
-              src="https://smo.ec/wp-content/uploads/2024/11/cropped-Shop_Icono_LogoShoppingV22.png" 
-              alt="Logo Shopping" 
-              className="h-12 w-auto object-contain"
-            />
+          <div className="flex flex-col items-end gap-3">
+            <div className="bg-white p-4 rounded-xl shadow-md border-2 border-blue-100">
+              <img
+                src="https://smo.ec/wp-content/uploads/2024/11/cropped-Shop_Icono_LogoShoppingV22.png"
+                alt="Logo Shopping"
+                className="h-12 w-auto object-contain"
+              />
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+            >
+              Cerrar Sesión
+            </button>
           </div>
         </header>
 
@@ -108,27 +125,24 @@ function App() {
           <h2 className="text-xl font-bold mb-6 text-gray-700 flex items-center gap-2">
             <span className="bg-blue-100 p-2 rounded-lg text-blue-600"></span> Registrar Nuevo Material
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Nombre y URL ocupan más espacio */}
             <div className="lg:col-span-2">
               <MyInput label="Nombre de la Pieza" value={form.pieza} onChange={e => setForm({...form, pieza: e.target.value})} placeholder="Ej: Gigantografía Exterior" />
             </div>
             <div className="lg:col-span-2">
               <MyInput label="URL de Imagen" value={form.imagen_url} onChange={e => setForm({...form, imagen_url: e.target.value})} placeholder="https://ejemplo.com/foto.jpg" />
             </div>
-            
-            {/* Dimensiones Independientes */}
+
             <MyInput label="Ancho" type="number" value={form.ancho} onChange={e => setForm({...form, ancho: e.target.value})} placeholder="0.00" />
             <MyInput label="Alto" type="number" value={form.alto} onChange={e => setForm({...form, alto: e.target.value})} placeholder="0.00" />
             <MyInput label="Profundidad/Altura" type="number" value={form.profundidad} onChange={e => setForm({...form, profundidad: e.target.value})} placeholder="0.00" />
 
-            {/* Selector de Unidades */}
             <div className="flex flex-col">
               <label className="text-sm font-bold text-gray-700 mb-1">Unidad</label>
-              <select 
+              <select
                 className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                value={form.unidad} 
+                value={form.unidad}
                 onChange={e => setForm({...form, unidad: e.target.value})}
               >
                 <option value="cm">Centímetros (cm)</option>
@@ -139,14 +153,13 @@ function App() {
               </select>
             </div>
 
-            {/* Precio y Categoría */}
             <MyInput label="Precio Base ($)" type="number" value={form.precio_base} onChange={e => setForm({...form, precio_base: e.target.value})} placeholder="0.00" />
-            
+
             <div className="flex flex-col">
               <label className="text-sm font-bold text-gray-700 mb-1">Categoría</label>
-              <select 
+              <select
                 className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                value={form.categoria} 
+                value={form.categoria}
                 onChange={e => setForm({...form, categoria: e.target.value})}
               >
                 <option value="Digital">Digital</option>
@@ -154,15 +167,14 @@ function App() {
                 <option value="Audiovisual">Audiovisual</option>
               </select>
             </div>
-            
-            {/* Botón Guardar - Variante Primary que configuramos */}
+
             <div className="flex items-end lg:col-span-2">
               <MyButton onClick={handleSave} variant="primary">
                 Guardar Material
               </MyButton>
             </div>
           </div>
-          
+
           {error && <p className="text-red-500 mt-4 font-bold animate-pulse text-sm">⚠️ {error}</p>}
         </div>
 
@@ -181,10 +193,10 @@ function App() {
             </div>
           ) : (
             tarifas.map((t) => (
-              <Card 
-                key={t.id} 
-                tarifa={t} 
-                onDelete={handleDelete} 
+              <Card
+                key={t.id}
+                tarifa={t}
+                onDelete={handleDelete}
               />
             ))
           )}
@@ -194,4 +206,4 @@ function App() {
   );
 }
 
-export default App;
+export default UsuarioPage;

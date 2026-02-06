@@ -43,7 +43,21 @@ router.post('/', async (req, res) => {
     }
 });
 
-// 3. Eliminar pieza (DELETE)
+// 3. Actualizar pieza (PUT)
+router.put('/:id', async (req, res) => {
+    try {
+        const tarifa = await Tarifa.findByPk(req.params.id);
+        if (!tarifa) {
+            return res.status(404).json({ message: "Tarifa no encontrada" });
+        }
+        await tarifa.update(req.body);
+        res.json(tarifa);
+    } catch (error) {
+        res.status(400).json({ message: "Error al actualizar", error: error.message });
+    }
+});
+
+// 4. Eliminar pieza (DELETE)
 router.delete('/:id', async (req, res) => {
     try {
         await Tarifa.destroy({ where: { id: req.params.id } });
