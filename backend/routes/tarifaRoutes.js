@@ -26,6 +26,11 @@ router.post('/', async (req, res) => {
             imagen_url
         } = req.body;
 
+        // Validar que el precio base sea mayor a 0
+        if (!precio_base || precio_base <= 0) {
+            return res.status(400).json({ message: "El precio base debe ser mayor a 0" });
+        }
+
         // Verificar si ya existe una pieza con el mismo nombre, ancho, alto y profundidad
         const existente = await Tarifa.findOne({
             where: { pieza, ancho, alto, profundidad }

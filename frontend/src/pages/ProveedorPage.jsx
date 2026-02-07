@@ -35,7 +35,7 @@ function ProveedorPage() {
           }
         }
       } catch (err) {
-        // silencioso
+        
       }
     }
     setMisPrecios(preciosMap);
@@ -141,7 +141,7 @@ function ProveedorPage() {
         ) : (
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full">  
                 <thead>
                   <tr className="bg-[#1e3a5f] text-white">
                     <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider">Imagen</th>
