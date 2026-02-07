@@ -15,16 +15,25 @@ router.get('/', async (req, res) => {
 // 2. Crear nueva pieza 
 router.post('/', async (req, res) => {
     try {
-        const { 
-            pieza, 
-            ancho, 
-            alto, 
-            profundidad, 
-            unidad, 
-            precio_base, 
-            categoria, 
-            imagen_url 
+        const {
+            pieza,
+            ancho,
+            alto,
+            profundidad,
+            unidad,
+            precio_base,
+            categoria,
+            imagen_url
         } = req.body;
+
+        // Verificar si ya existe una pieza con el mismo nombre, ancho, alto y profundidad
+        const existente = await Tarifa.findOne({
+            where: { pieza, ancho, alto, profundidad }
+        });
+
+        if (existente) {
+            return res.status(409).json({ message: "Artículo ya creado con las mismas dimensiones" });
+        }
 
         const nuevaTarifa = await Tarifa.create({
             pieza,
