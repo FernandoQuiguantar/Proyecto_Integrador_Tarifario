@@ -1,44 +1,51 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); 
+const sequelize = require('../config/db');
 
 const Tarifa = sequelize.define('Tarifa', {
-  // Nombre del material/pieza
-  pieza: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
+  codigo: {
+    type: DataTypes.STRING(50),
+    allowNull: false
   },
-  ancho: { 
-    type: DataTypes.FLOAT, 
-    defaultValue: 0 
+  pieza: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
-  alto: { 
-    type: DataTypes.FLOAT, 
-    defaultValue: 0 
+  cotizacion_tipo: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Mantenimiento'
   },
-  profundidad: { 
-    type: DataTypes.FLOAT, 
-    defaultValue: 0 
+  descripcion_material: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-  unidad: { 
-    type: DataTypes.STRING, 
-    defaultValue: 'cm' 
+  medida: {
+    type: DataTypes.STRING(100),
+    allowNull: true
   },
-  precio_base: { 
-    type: DataTypes.FLOAT, 
-    allowNull: false 
+  unidad: {
+    type: DataTypes.STRING,
+    defaultValue: 'cm'
   },
-  categoria: { 
-    type: DataTypes.STRING, 
-    defaultValue: 'Digital' 
+  cantidad: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0
   },
-  imagen_url: { 
-    type: DataTypes.TEXT, 
-    allowNull: true 
+  categoria: {
+    type: DataTypes.STRING,
+    defaultValue: 'Elemento iluminado'
+  },
+  centro_comercial: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  imagen_url: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
-  // Esto asegura que la tabla se llame 'tarifas' en tu base de datos de Docker
   tableName: 'tarifas',
-  timestamps: true // Crea automáticamente las columnas createdAt y updatedAt
+  timestamps: true
 });
 
 module.exports = Tarifa;

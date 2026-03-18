@@ -1,69 +1,43 @@
 const express = require('express');
 const router = express.Router();
-const Tarifa = require('../models/Tarifa'); // Asegúrate de que la ruta al modelo sea correcta
+const Tarifa = require('../models/Tarifa');
 
-// 1. Obtener todas las piezas (GET)
+// GET /api/tarifas - Obtener todas las tarifas
 router.get('/', async (req, res) => {
     try {
-        const tarifas = await Tarifa.findAll({ order: [['createdAt', 'DESC']] });
+        const tarifas = await Tarifa.findAll({ order: [['codigo', 'ASC'], ['cotizacion_tipo', 'ASC']] });
         res.json(tarifas);
     } catch (error) {
         res.status(500).json({ message: "Error al obtener datos" });
     }
 });
 
-// 2. Crear nueva pieza 
+// POST /api/tarifas - Crear nueva cotizacion para un articulo
 router.post('/', async (req, res) => {
     try {
-        const {
-            pieza,
-            ancho,
-            alto,
-            profundidad,
-            unidad,
-            precio_base,
-            categoria,
-            imagen_url
-        } = req.body;
+        const { codigo, pieza, cotizacion_tipo, descripcion_material, medida, unidad, cantidad, categoria, centro_comercial, imagen_url } = req.body;
 
-        // Validar que el precio base sea mayor a 0
-        if (!precio_base || precio_base <= 0) {
-            return res.status(400).json({ message: "El precio base debe ser mayor a 0" });
-        }
+        if (!codigo) return res.status(400).json({ message: "El código es obligatorio" });
+        if (!pieza) return res.status(400).json({ message: "El nombre de la pieza es obligatorio" });
+        if (!cotizacion_tipo) return res.status(400).json({ message: "El tipo de cotización es obligatorio" });
 
-        // Verificar si ya existe una pieza con el mismo nombre, ancho, alto y profundidad
-        const existente = await Tarifa.findOne({
-            where: { pieza, ancho, alto, profundidad }
-        });
-
+        const existente = await Tarifa.findOne({ where: { codigo, cotizacion_tipo } });
         if (existente) {
-            return res.status(409).json({ message: "Artículo ya creado con las mismas dimensiones" });
+            return res.status(409).json({ message: `Ya existe '${codigo}' con tipo '${cotizacion_tipo}'. Use un código o tipo diferente.` });
         }
 
-        const nuevaTarifa = await Tarifa.create({
-            pieza,
-            ancho,
-            alto,
-            profundidad,
-            unidad,
-            precio_base,
-            categoria,
-            imagen_url
-        });
-
-        res.status(201).json(nuevaTarifa);
+        const nueva = await Tarifa.create({ codigo, pieza, cotizacion_tipo, descripcion_material, medida, unidad, cantidad, categoria, centro_comercial, imagen_url });
+        res.status(201).json(nueva);
     } catch (error) {
         res.status(400).json({ message: "Error al registrar", error: error.message });
     }
 });
 
-// 3. Actualizar pieza (PUT)
+// PUT /api/tarifas/:id
 router.put('/:id', async (req, res) => {
     try {
         const tarifa = await Tarifa.findByPk(req.params.id);
-        if (!tarifa) {
-            return res.status(404).json({ message: "Tarifa no encontrada" });
-        }
+        if (!tarifa) return res.status(404).json({ message: "Tarifa no encontrada" });
         await tarifa.update(req.body);
         res.json(tarifa);
     } catch (error) {
@@ -71,7 +45,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// 4. Eliminar pieza (DELETE)
+// DELETE /api/tarifas/:id
 router.delete('/:id', async (req, res) => {
     try {
         await Tarifa.destroy({ where: { id: req.params.id } });

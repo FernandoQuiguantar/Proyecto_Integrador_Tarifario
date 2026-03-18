@@ -33,3 +33,9 @@ frontend/node_modules/
 
 # Archivos de compilación
 frontend/dist/
+
+# Imágenes subidas localmente
+backend/uploads/
+
+# Docker local
+docker-compose.yml

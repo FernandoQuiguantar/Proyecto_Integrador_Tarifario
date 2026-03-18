@@ -39,7 +39,8 @@ router.get('/:tarifa_id', async (req, res) => {
   try {
     const precios = await PrecioProveedor.findAll({
       where: { tarifa_id: req.params.tarifa_id },
-      order: [['precio', 'ASC']]
+      order: [['precio', 'ASC']],
+      limit: 3
     });
     res.json(precios);
   } catch (error) {
