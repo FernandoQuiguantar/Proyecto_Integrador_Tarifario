@@ -124,7 +124,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
     const data = new FormData();
     data.append('imagen', file);
     try {
-      const res = await fetch('${API_BASE}/api/upload', { method: 'POST', body: data });
+      const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: data });
       const json = await res.json();
       if (res.ok) {
         setEditForm(f => ({ ...f, imagen_url: json.url }));
