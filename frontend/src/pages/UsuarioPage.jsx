@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import MyButton from '../components/MyButton';
 import MyInput from '../components/MyInput';
 import Card from '../components/Card';
+import API_BASE from '../config';
 
 function UsuarioPage() {
   const navigate = useNavigate();
@@ -25,8 +26,8 @@ function UsuarioPage() {
     imagen_url: ''
   });
 
-  const API_URL = 'http://localhost:3000/api/tarifas';
-  const UPLOAD_URL = 'http://localhost:3000/api/upload';
+  const API_URL = `${API_BASE}/api/tarifas`;
+  const UPLOAD_URL = `${API_BASE}/api/upload`;
 
   const handleImagenChange = async (e) => {
     const file = e.target.files[0];
@@ -223,7 +224,7 @@ function UsuarioPage() {
                   <input type="file" accept="image/*" onChange={handleImagenChange}
                     className="p-2 border-2 border-gray-200 rounded-xl text-sm bg-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 cursor-pointer" />
                   {form.imagen_url && (
-                    <img src={`http://localhost:3000${form.imagen_url}`} alt="preview" className="mt-2 h-16 w-auto rounded-lg object-cover border border-gray-200" />
+                    <img src={`${API_BASE}${form.imagen_url}`} alt="preview" className="mt-2 h-16 w-auto rounded-lg object-cover border border-gray-200" />
                   )}
                 </div>
 

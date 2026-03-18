@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE from '../config';
 
 const TIPO_BADGE = {
   'Mantenimiento': 'bg-amber-100 text-amber-800',
@@ -19,8 +20,8 @@ function ProveedorPage() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
 
-  const API_URL = 'http://localhost:3000/api/tarifas';
-  const PRECIOS_URL = 'http://localhost:3000/api/precios';
+  const API_URL = `${API_BASE}/api/tarifas`;
+  const PRECIOS_URL = `${API_BASE}/api/precios`;
 
   const fetchTarifas = async () => {
     try {

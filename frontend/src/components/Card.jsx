@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import MyButton from './MyButton';
+import API_BASE from '../config';
 
-const API_URL = 'http://localhost:3000/api/tarifas';
+const API_URL = `${API_BASE}/api/tarifas`;
 
 const CATEGORIAS = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 const CENTROS = ['INMODIAMANTE', 'CONDADO', 'CCI'];
@@ -22,7 +23,7 @@ const TIPO_ACTIVE = {
   'Brandeo/Mantenimiento': 'bg-cyan-600 text-white border-cyan-600',
 };
 
-const PRECIOS_URL = 'http://localhost:3000/api/precios';
+const PRECIOS_URL = `${API_BASE}/api/precios`;
 
 const Card = ({ grupo, onDelete, onUpdate }) => {
   const base = grupo[0];
@@ -123,7 +124,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
     const data = new FormData();
     data.append('imagen', file);
     try {
-      const res = await fetch('http://localhost:3000/api/upload', { method: 'POST', body: data });
+      const res = await fetch('${API_BASE}/api/upload', { method: 'POST', body: data });
       const json = await res.json();
       if (res.ok) {
         setEditForm(f => ({ ...f, imagen_url: json.url }));
@@ -164,7 +165,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
       <div className="h-44 bg-gray-100 overflow-hidden relative cursor-pointer" onClick={() => setVerImagen(true)}>
         <img
           src={base.imagen_url
-            ? (base.imagen_url.startsWith('http') ? base.imagen_url : `http://localhost:3000${base.imagen_url}`)
+            ? (base.imagen_url.startsWith('http') ? base.imagen_url : `${API_BASE}${base.imagen_url}`)
             : 'https://via.placeholder.com/400x300?text=Material+Marketing'
           }
           alt={base.pieza}
@@ -190,7 +191,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
           <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
             <img
               src={base.imagen_url
-                ? (base.imagen_url.startsWith('http') ? base.imagen_url : `http://localhost:3000${base.imagen_url}`)
+                ? (base.imagen_url.startsWith('http') ? base.imagen_url : `${API_BASE}${base.imagen_url}`)
                 : 'https://via.placeholder.com/800x600?text=Sin+imagen'
               }
               alt={base.pieza}
@@ -378,7 +379,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
               {añadirForm.imagen_url && (
                 <div className="flex items-center gap-3">
                   <img
-                    src={añadirForm.imagen_url.startsWith('http') ? añadirForm.imagen_url : `http://localhost:3000${añadirForm.imagen_url}`}
+                    src={añadirForm.imagen_url.startsWith('http') ? añadirForm.imagen_url : `${API_BASE}${añadirForm.imagen_url}`}
                     alt="preview"
                     className="h-14 w-auto rounded-lg object-cover border border-gray-200"
                   />
@@ -491,7 +492,7 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
                 {uploadingImg && <p className="text-xs text-blue-500 mt-1 font-semibold">Subiendo imagen...</p>}
                 {editForm.imagen_url && !uploadingImg && (
                   <img
-                    src={editForm.imagen_url.startsWith('http') ? editForm.imagen_url : `http://localhost:3000${editForm.imagen_url}`}
+                    src={editForm.imagen_url.startsWith('http') ? editForm.imagen_url : `${API_BASE}${editForm.imagen_url}`}
                     alt="preview"
                     className="mt-2 h-16 w-auto rounded-lg object-cover border border-gray-200"
                   />
