@@ -1,8 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const multer = require('multer');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 const sequelize = require('./config/db');
 const tarifaRoutes = require('./routes/tarifaRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -13,25 +12,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Carpeta de imágenes subidas
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-app.use('/uploads', express.static(uploadsDir));
-
-// Configuración de multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  }
+// Configuración de Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-const upload = multer({ storage });
 
-// Endpoint de carga de imágenes
-app.post('/api/upload', upload.single('imagen'), (req, res) => {
+// Multer en memoria (no guarda en disco)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Endpoint de carga de imágenes → sube a Cloudinary
+app.post('/api/upload', upload.single('imagen'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No se recibió archivo' });
-  res.json({ url: `/uploads/${req.file.filename}` });
+  try {
+    const resultado = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'tarifario_smo' },
+        (error, result) => error ? reject(error) : resolve(result)
+      );
+      stream.end(req.file.buffer);
+    });
+    res.json({ url: resultado.secure_url });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al subir imagen a Cloudinary' });
+  }
 });
 
 // Rutas
