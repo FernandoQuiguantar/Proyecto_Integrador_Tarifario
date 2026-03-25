@@ -21,9 +21,12 @@ router.post('/', async (req, res) => {
         if (!pieza) return res.status(400).json({ message: "El nombre de la pieza es obligatorio" });
         if (!cotizacion_tipo) return res.status(400).json({ message: "El tipo de cotización es obligatorio" });
 
-        const existente = await Tarifa.findOne({ where: { codigo, cotizacion_tipo } });
+        const whereClause = centro_comercial
+            ? { codigo, cotizacion_tipo, centro_comercial }
+            : { codigo, cotizacion_tipo };
+        const existente = await Tarifa.findOne({ where: whereClause });
         if (existente) {
-            return res.status(409).json({ message: `Ya existe '${codigo}' con tipo '${cotizacion_tipo}'. Use un código o tipo diferente.` });
+            return res.status(409).json({ message: `Ya existe '${codigo}' con tipo '${cotizacion_tipo}' en '${centro_comercial || 'sin centro'}'. Use un código o tipo diferente.` });
         }
 
         const nueva = await Tarifa.create({ codigo, pieza, cotizacion_tipo, descripcion_material, medida, unidad, cantidad, categoria, centro_comercial, imagen_url });
