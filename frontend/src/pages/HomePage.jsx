@@ -1,7 +1,14 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 
 function HomePage() {
   const navigate = useNavigate();
+  const { account } = useAuth();
+
+  useEffect(() => {
+    if (account) navigate('/usuario');
+  }, [account, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-10 font-sans text-gray-800 flex items-center justify-center">
@@ -10,12 +17,9 @@ function HomePage() {
         {/* ENCABEZADO */}
         <header className="bg-[#1e3a5f] text-white p-10 rounded-t-3xl flex justify-between items-start shadow-2xl">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">
-              Proyecto Integrador: Tarifario de Marketing
+            <h1 className="text-3xl font-bold tracking-tight mb-2 whitespace-nowrap">
+              Tarifario SMO
             </h1>
-            <p className="text-gray-300 italic text-lg font-medium">
-              Desarrollado por: Erick Quiguantar - PUCE
-            </p>
           </div>
           <div className="bg-white p-4 rounded-xl shadow-md ml-4 border-2 border-blue-100">
             <img
@@ -50,13 +54,13 @@ function HomePage() {
 
             {/* BOTÓN PROVEEDOR */}
             <button
-              onClick={() => navigate('/login-proveedor')}
+              onClick={() => navigate('/proveedor')}
               className="flex-1 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-8 rounded-2xl shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300 group"
             >
               <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🏢</div>
-              <h3 className="text-xl font-bold mb-2">Ingresar Proveedor</h3>
+              <h3 className="text-xl font-bold mb-2">Registrar Proveedores</h3>
               <p className="text-emerald-200 text-sm">
-                Oferte con sus precios
+                Registre los precios del Proveedor
               </p>
             </button>
           </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import MyButton from '../components/MyButton';
 import MyInput from '../components/MyInput';
 import Card from '../components/Card';
@@ -7,6 +8,8 @@ import API_BASE from '../config';
 
 function UsuarioPage() {
   const navigate = useNavigate();
+  const { account, rol, loadingRol, logout } = useAuth();
+
   const [tarifas, setTarifas] = useState([]);
   const [error, setError] = useState('');
   const [formVisible, setFormVisible] = useState(true);
@@ -28,6 +31,7 @@ function UsuarioPage() {
 
   const API_URL = `${API_BASE}/api/tarifas`;
   const UPLOAD_URL = `${API_BASE}/api/upload`;
+  const esAdmin = rol === 'admin';
 
   const handleImagenChange = async (e) => {
     const file = e.target.files[0];
@@ -46,24 +50,25 @@ function UsuarioPage() {
   const fetchTarifas = async () => {
     try {
       const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("Error en la respuesta del servidor");
+      if (!res.ok) throw new Error('Error en la respuesta del servidor');
       setTarifas(await res.json());
     } catch (err) {
-      console.error("Error al cargar el tarifario:", err);
+      console.error('Error al cargar el tarifario:', err);
     }
   };
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (!user) { navigate('/login-usuario'); return; }
-    fetchTarifas();
-  }, [navigate]);
+    if (!loadingRol) {
+      if (!account) { navigate('/login-usuario'); return; }
+      if (rol !== 'admin' && rol !== 'usuario') { navigate('/login-usuario'); return; }
+      fetchTarifas();
+    }
+  }, [account, rol, loadingRol, navigate]);
 
   const handleSave = async () => {
     setError('');
     if (!form.codigo) return setError('El código es obligatorio (Ej: IMP-001)');
     if (!form.pieza) return setError('El nombre de la pieza es obligatorio');
-
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -72,7 +77,7 @@ function UsuarioPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message || "Error al guardar");
+        setError(data.message || 'Error al guardar');
       } else {
         setForm({
           codigo: '', pieza: '', cotizacion_tipo: 'Mantenimiento',
@@ -81,28 +86,39 @@ function UsuarioPage() {
         });
         fetchTarifas();
       }
-    } catch (err) {
-      setError("No se pudo conectar con el servidor del Tarifario.");
+    } catch {
+      setError('No se pudo conectar con el servidor del Tarifario.');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta cotización del catálogo?")) {
+    if (window.confirm('¿Estás seguro de eliminar esta cotización del catálogo?')) {
       try {
         await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         fetchTarifas();
-      } catch (err) {
-        alert("Error al intentar eliminar.");
+      } catch {
+        alert('Error al intentar eliminar.');
       }
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    logout();
     navigate('/');
   };
 
-  // Filtrar tarifas planas
+  const handleSyncImagenes = async () => {
+    if (!window.confirm('¿Deseas propagar las imágenes a todos los artículos que comparten el mismo código y centro comercial?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tarifas/sync-imagenes`, { method: 'POST' });
+      const data = await res.json();
+      alert(data.message);
+      if (data.actualizados > 0) fetchTarifas();
+    } catch (err) {
+      alert('Error al sincronizar imágenes: ' + err.message);
+    }
+  };
+
   const tarifasFiltradas = tarifas.filter(t => {
     const texto = busqueda.toLowerCase();
     const coincideTexto = !busqueda ||
@@ -114,13 +130,20 @@ function UsuarioPage() {
     return coincideTexto && coincideCategoria && coincideCentro;
   });
 
-  // Agrupar por código
   const gruposMap = tarifasFiltradas.reduce((acc, t) => {
     if (!acc[t.codigo]) acc[t.codigo] = [];
     acc[t.codigo].push(t);
     return acc;
   }, {});
   const grupos = Object.values(gruposMap);
+
+  if (loadingRol) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-gray-500 font-semibold">Verificando acceso...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-10 font-sans text-gray-800">
@@ -129,116 +152,125 @@ function UsuarioPage() {
         {/* ENCABEZADO */}
         <header className="bg-[#1e3a5f] text-white p-10 rounded-t-3xl flex justify-between items-start shadow-2xl">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Proyecto Integrador: Tarifario de Marketing</h1>
-            <p className="text-gray-300 italic text-lg font-medium">Desarrollado por: Erick Quiguantar - PUCE</p>
-            <p className="text-blue-200 text-sm mt-2 font-semibold">Panel de Usuario</p>
+            <h1 className="text-3xl font-bold tracking-tight mb-2 whitespace-nowrap">Tarifario SMO</h1>
+            <p className="text-blue-200 text-sm mt-1 font-semibold">
+              {esAdmin ? 'Panel Administrador' : 'Panel de Usuario'} —{' '}
+              <span className="text-white">{account?.name || account?.username}</span>
+            </p>
           </div>
           <div className="flex flex-col items-end gap-3">
             <div className="bg-white p-4 rounded-xl shadow-md border-2 border-blue-100">
               <img src="https://smo.ec/wp-content/uploads/2024/11/cropped-Shop_Icono_LogoShoppingV22.png" alt="Logo" className="h-12 w-auto object-contain" />
             </div>
+            {esAdmin && (
+              <button onClick={() => navigate('/admin/roles')} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                👥 Gestionar Accesos
+              </button>
+            )}
             <button onClick={handleLogout} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
               Cerrar Sesión
             </button>
           </div>
         </header>
 
-        {/* FORMULARIO DE REGISTRO */}
-        <div className="bg-white rounded-b-3xl shadow-xl border-x border-b border-gray-100 mb-8">
-          <div className="flex justify-between items-center px-8 py-5 border-b border-gray-100">
-            <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
-              <span className="bg-blue-100 p-2 rounded-lg text-blue-600">📋</span>
-              Registrar Nuevo Material / Cotización
-            </h2>
-            <button
-              onClick={() => setFormVisible(!formVisible)}
-              className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 px-3 py-2 rounded-xl transition-colors"
-            >
-              {formVisible ? (
-                <><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>Minimizar</>
-              ) : (
-                <><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>Expandir</>
-              )}
-            </button>
-          </div>
-
-          {formVisible && (
-            <div className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <MyInput label="Código" value={form.codigo} onChange={e => setForm({...form, codigo: e.target.value})} placeholder="Ej: IMP-001" />
-                </div>
-                <div className="lg:col-span-3">
-                  <MyInput label="Nombre de la Pieza" value={form.pieza} onChange={e => setForm({...form, pieza: e.target.value})} placeholder="Ej: Gigantografía Exterior" />
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="text-sm font-bold text-gray-700 mb-1">Tipo de Cotización</label>
-                  <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                    value={form.cotizacion_tipo} onChange={e => setForm({...form, cotizacion_tipo: e.target.value})}>
-                    <option value="Mantenimiento">Mantenimiento</option>
-                    <option value="Brandeo">Brandeo</option>
-                    <option value="Nuevo">Nuevo</option>
-                    <option value="Comprar Nuevo">Comprar Nuevo</option>
-                  </select>
-                </div>
-
-                <div className="lg:col-span-3 flex flex-col">
-                  <label className="text-sm font-bold text-gray-700 mb-1">Descripción del Material</label>
-                  <textarea
-                    className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors resize-none text-sm"
-                    rows={2}
-                    value={form.descripcion_material}
-                    onChange={e => setForm({...form, descripcion_material: e.target.value})}
-                    placeholder="Ej: Vinil adhesivo removible mate, laminado brillante..."
-                  />
-                </div>
-
-                <MyInput label="Medida" value={form.medida} onChange={e => setForm({...form, medida: e.target.value})} placeholder="Ej: 2x3 mts" />
-                <MyInput label="Cantidad" type="number" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} placeholder="0" />
-
-                <div className="flex flex-col">
-                  <label className="text-sm font-bold text-gray-700 mb-1">Categoría</label>
-                  <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                    value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
-                    <option value="Elemento iluminado">Elemento iluminado</option>
-                    <option value="Estructura física">Estructura física</option>
-                    <option value="Material impreso">Material impreso</option>
-                    <option value="Piezas por metro cuadrado">Piezas por metro cuadrado</option>
-                    <option value="Servicio">Servicio</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col">
-                  <label className="text-sm font-bold text-gray-700 mb-1">Centro Comercial</label>
-                  <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                    value={form.centro_comercial} onChange={e => setForm({...form, centro_comercial: e.target.value})}>
-                    <option value="INMODIAMANTE">INMODIAMANTE</option>
-                    <option value="CONDADO">CONDADO</option>
-                    <option value="CCI">CCI</option>
-                  </select>
-                </div>
-
-                <div className="lg:col-span-2 flex flex-col">
-                  <label className="text-sm font-bold text-gray-700 mb-1">Imagen</label>
-                  <input type="file" accept="image/*" onChange={handleImagenChange}
-                    className="p-2 border-2 border-gray-200 rounded-xl text-sm bg-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 cursor-pointer" />
-                  {form.imagen_url && (
-                    <img src={`${API_BASE}${form.imagen_url}`} alt="preview" className="mt-2 h-16 w-auto rounded-lg object-cover border border-gray-200" />
-                  )}
-                </div>
-
-                <div className="flex items-end lg:col-span-2">
-                  <MyButton onClick={handleSave} variant="primary">Guardar Cotización</MyButton>
-                </div>
-              </div>
-              {error && <p className="text-red-500 mt-4 font-bold text-sm">⚠️ {error}</p>}
+        {/* FORMULARIO — solo admin */}
+        {esAdmin && (
+          <div className="bg-white rounded-b-3xl shadow-xl border-x border-b border-gray-100 mb-8">
+            <div className="flex justify-between items-center px-8 py-5 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+                <span className="bg-blue-100 p-2 rounded-lg text-blue-600">📋</span>
+                Registrar Nuevo Material / Cotización
+              </h2>
+              <button
+                onClick={() => setFormVisible(!formVisible)}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 px-3 py-2 rounded-xl transition-colors"
+              >
+                {formVisible ? (
+                  <><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>Minimizar</>
+                ) : (
+                  <><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>Expandir</>
+                )}
+              </button>
             </div>
-          )}
-        </div>
+
+            {formVisible && (
+              <div className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <MyInput label="Código" value={form.codigo} onChange={e => setForm({...form, codigo: e.target.value})} placeholder="Ej: IMP-001" />
+                  </div>
+                  <div className="lg:col-span-3">
+                    <MyInput label="Nombre de la Pieza" value={form.pieza} onChange={e => setForm({...form, pieza: e.target.value})} placeholder="Ej: Gigantografía Exterior" />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="text-sm font-bold text-gray-700 mb-1">Tipo de Cotización</label>
+                    <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
+                      value={form.cotizacion_tipo} onChange={e => setForm({...form, cotizacion_tipo: e.target.value})}>
+                      <option value="Mantenimiento">Mantenimiento</option>
+                      <option value="Brandeo">Brandeo</option>
+                      <option value="Nuevo">Nuevo</option>
+                      <option value="Comprar Nuevo">Comprar Nuevo</option>
+                    </select>
+                  </div>
+
+                  <div className="lg:col-span-3 flex flex-col">
+                    <label className="text-sm font-bold text-gray-700 mb-1">Descripción del Material</label>
+                    <textarea
+                      className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors resize-none text-sm"
+                      rows={2}
+                      value={form.descripcion_material}
+                      onChange={e => setForm({...form, descripcion_material: e.target.value})}
+                      placeholder="Ej: Vinil adhesivo removible mate, laminado brillante..."
+                    />
+                  </div>
+
+                  <MyInput label="Medida" value={form.medida} onChange={e => setForm({...form, medida: e.target.value})} placeholder="Ej: 2x3 mts" />
+                  <MyInput label="Cantidad" type="number" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} placeholder="0" />
+
+                  <div className="flex flex-col">
+                    <label className="text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                    <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
+                      value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
+                      <option value="Elemento iluminado">Elemento iluminado</option>
+                      <option value="Estructura física">Estructura física</option>
+                      <option value="Material impreso">Material impreso</option>
+                      <option value="Piezas por metro cuadrado">Piezas por metro cuadrado</option>
+                      <option value="Servicio">Servicio</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="text-sm font-bold text-gray-700 mb-1">Centro Comercial</label>
+                    <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
+                      value={form.centro_comercial} onChange={e => setForm({...form, centro_comercial: e.target.value})}>
+                      <option value="INMODIAMANTE">INMODIAMANTE</option>
+                      <option value="CONDADO">CONDADO</option>
+                      <option value="CCI">CCI</option>
+                    </select>
+                  </div>
+
+                  <div className="lg:col-span-2 flex flex-col">
+                    <label className="text-sm font-bold text-gray-700 mb-1">Imagen</label>
+                    <input type="file" accept="image/*" onChange={handleImagenChange}
+                      className="p-2 border-2 border-gray-200 rounded-xl text-sm bg-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 cursor-pointer" />
+                    {form.imagen_url && (
+                      <img src={form.imagen_url} alt="preview" className="mt-2 h-16 w-auto rounded-lg object-cover border border-gray-200" />
+                    )}
+                  </div>
+
+                  <div className="flex items-end lg:col-span-2">
+                    <MyButton onClick={handleSave} variant="primary">Guardar Cotización</MyButton>
+                  </div>
+                </div>
+                {error && <p className="text-red-500 mt-4 font-bold text-sm">⚠️ {error}</p>}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* BARRA DE BÚSQUEDA Y FILTROS */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-8 flex flex-col md:flex-row gap-4">
+        <div className={`bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-8 flex flex-col md:flex-row gap-4 ${!esAdmin ? 'rounded-t-3xl' : ''}`}>
           <div className="flex-1 relative">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -274,9 +306,20 @@ function UsuarioPage() {
         {/* CATÁLOGO */}
         <div className="flex justify-between items-center mb-8 border-b-2 border-blue-100 pb-2">
           <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Catálogo de Servicios, Piezas y Materiales</h2>
-          <span className="bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold">
-            {grupos.length} Artículos
-          </span>
+          <div className="flex items-center gap-3">
+            {esAdmin && (
+              <button
+                onClick={handleSyncImagenes}
+                title="Copia la imagen de artículos que la tienen hacia los que comparten el mismo código y centro comercial"
+                className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors"
+              >
+                🖼️ Sincronizar Imágenes
+              </button>
+            )}
+            <span className="bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold">
+              {grupos.length} Artículos
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -288,7 +331,13 @@ function UsuarioPage() {
             </div>
           ) : (
             grupos.map(grupo => (
-              <Card key={grupo[0].codigo} grupo={grupo} onDelete={handleDelete} onUpdate={fetchTarifas} />
+              <Card
+                key={grupo[0].codigo}
+                grupo={grupo}
+                onDelete={esAdmin ? handleDelete : null}
+                onUpdate={esAdmin ? fetchTarifas : null}
+                soloLectura={!esAdmin}
+              />
             ))
           )}
         </div>

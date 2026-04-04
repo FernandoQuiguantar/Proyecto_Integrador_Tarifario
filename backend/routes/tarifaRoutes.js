@@ -36,6 +36,37 @@ router.post('/', async (req, res) => {
     }
 });
 
+// POST /api/tarifas/sync-imagenes - Propaga imagen_url entre items del mismo código y centro
+router.post('/sync-imagenes', async (req, res) => {
+  try {
+    const tarifas = await Tarifa.findAll();
+
+    // Agrupar por (codigo, centro_comercial)
+    const grupos = {};
+    tarifas.forEach(t => {
+      const key = `${t.codigo}||${t.centro_comercial || ''}`;
+      if (!grupos[key]) grupos[key] = [];
+      grupos[key].push(t);
+    });
+
+    let actualizados = 0;
+    for (const grupo of Object.values(grupos)) {
+      const conImagen = grupo.find(t => t.imagen_url && t.imagen_url.trim() !== '');
+      if (!conImagen) continue;
+      for (const t of grupo) {
+        if (!t.imagen_url || t.imagen_url.trim() === '') {
+          await t.update({ imagen_url: conImagen.imagen_url });
+          actualizados++;
+        }
+      }
+    }
+
+    res.json({ actualizados, message: `${actualizados} tarifa(s) actualizada(s) con imagen.` });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al sincronizar imágenes', error: error.message });
+  }
+});
+
 // PUT /api/tarifas/:id
 router.put('/:id', async (req, res) => {
     try {

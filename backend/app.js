@@ -6,7 +6,11 @@ const sequelize = require('./config/db');
 const tarifaRoutes = require('./routes/tarifaRoutes');
 const authRoutes = require('./routes/authRoutes');
 const precioProveedorRoutes = require('./routes/precioProveedorRoutes');
+const proveedorRoutes = require('./routes/proveedorRoutes');
+const userRoleRoutes = require('./routes/userRoleRoutes');
 require('./models/PrecioProveedor');
+require('./models/Proveedor');
+require('./models/UserRole');
 
 const app = express();
 app.use(cors());
@@ -43,9 +47,11 @@ app.post('/api/upload', upload.single('imagen'), async (req, res) => {
 app.use('/api/tarifas', tarifaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/precios', precioProveedorRoutes);
+app.use('/api/proveedores', proveedorRoutes);
+app.use('/api/roles', userRoleRoutes);
 
 // Sincronización con BD
 const PORT = process.env.PORT || 3000;
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
 }).catch(err => console.error('Error conectando a la DB:', err));

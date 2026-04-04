@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const PrecioProveedor = require('../models/PrecioProveedor');
+const Tarifa = require('../models/Tarifa');
 
 // POST /api/precios - Crear o actualizar precio de un proveedor para una tarifa
 router.post('/', async (req, res) => {
@@ -31,6 +32,25 @@ router.post('/', async (req, res) => {
     res.status(201).json(nuevo);
   } catch (error) {
     res.status(400).json({ message: 'Error al guardar precio', error: error.message });
+  }
+});
+
+// GET /api/precios/proveedor/:email - Ofertas de un proveedor con centro_comercial
+router.get('/proveedor/:email', async (req, res) => {
+  try {
+    const precios = await PrecioProveedor.findAll({
+      where: { proveedor_email: req.params.email },
+      include: [{ model: Tarifa, attributes: ['centro_comercial'] }],
+    });
+    // Agrupar conteo por centro_comercial
+    const conteo = {};
+    precios.forEach(p => {
+      const cc = p.Tarifa?.centro_comercial || 'Sin centro';
+      conteo[cc] = (conteo[cc] || 0) + 1;
+    });
+    res.json({ total: precios.length, por_centro: conteo });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener ofertas del proveedor' });
   }
 });
 

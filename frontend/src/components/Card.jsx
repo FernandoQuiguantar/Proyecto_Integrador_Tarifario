@@ -25,7 +25,7 @@ const TIPO_ACTIVE = {
 
 const PRECIOS_URL = `${API_BASE}/api/precios`;
 
-const Card = ({ grupo, onDelete, onUpdate }) => {
+const Card = ({ grupo, onDelete, onUpdate, soloLectura = false }) => {
   const base = grupo[0];
   const [activoId, setActivoId] = useState(null);
   const [precios, setPrecios] = useState([]);
@@ -310,32 +310,34 @@ const Card = ({ grupo, onDelete, onUpdate }) => {
           </div>
         )}
 
-        {/* Botones acción */}
-        <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50 gap-2 flex-wrap">
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleOpenEdit(activoId ? tarifaActiva : grupo[0])}
-              className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-200 hover:border-blue-600 px-3 py-1.5 rounded-xl transition-all duration-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              {activoId ? `Editar ${tarifaActiva?.cotizacion_tipo}` : 'Editar'}
-            </button>
-            <button
-              onClick={handleOpenAñadir}
-              className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-white hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 px-3 py-1.5 rounded-xl transition-all duration-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Añadir
-            </button>
+        {/* Botones acción — solo admin */}
+        {!soloLectura && (
+          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-50 gap-2 flex-wrap">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleOpenEdit(activoId ? tarifaActiva : grupo[0])}
+                className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-white hover:bg-blue-600 border border-blue-200 hover:border-blue-600 px-3 py-1.5 rounded-xl transition-all duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                {activoId ? `Editar ${tarifaActiva?.cotizacion_tipo}` : 'Editar'}
+              </button>
+              <button
+                onClick={handleOpenAñadir}
+                className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-white hover:bg-emerald-600 border border-emerald-200 hover:border-emerald-600 px-3 py-1.5 rounded-xl transition-all duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Añadir
+              </button>
+            </div>
+            <MyButton variant="danger" size="sm" onClick={() => onDelete(activoId || grupo[0].id)}>
+              {activoId ? `Eliminar ${tarifaActiva?.cotizacion_tipo}` : 'Eliminar'}
+            </MyButton>
           </div>
-          <MyButton variant="danger" size="sm" onClick={() => onDelete(activoId || grupo[0].id)}>
-            {activoId ? `Eliminar ${tarifaActiva?.cotizacion_tipo}` : 'Eliminar'}
-          </MyButton>
-        </div>
+        )}
       </div>
 
       {/* MODAL AÑADIR */}
