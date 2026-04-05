@@ -104,7 +104,7 @@ function UsuarioPage() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/login-usuario');
   };
 
   const handleSyncImagenes = async () => {

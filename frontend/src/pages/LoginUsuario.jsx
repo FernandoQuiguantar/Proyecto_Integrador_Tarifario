@@ -12,7 +12,7 @@ function LoginUsuario() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (account) navigate('/usuario');
+    if (account) navigate('/');
   }, [account, navigate]);
 
   const handleLogin = async (e) => {
@@ -28,7 +28,7 @@ function LoginUsuario() {
       const data = await res.json();
       if (res.ok) {
         login(data);
-        navigate('/usuario');
+        navigate('/');
       } else {
         setError(data.message || 'Credenciales inválidas');
       }
