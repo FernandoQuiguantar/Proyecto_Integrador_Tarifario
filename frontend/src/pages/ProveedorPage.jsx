@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import API_BASE from '../config';
 
 const CENTROS    = ['CCI', 'CONDADO', 'INMODIAMANTE'];
@@ -7,6 +8,8 @@ const CATEGORIAS = ['Elemento iluminado', 'Estructura física', 'Material impres
 
 function ProveedorPage() {
   const navigate = useNavigate();
+  const { rol } = useAuth();
+  const puedeEditar = rol === 'admin' || rol === 'editor';
   const [tarifas, setTarifas] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -22,6 +25,17 @@ function ProveedorPage() {
 
   const toggleCheck = (valor, setLista) => {
     setLista(prev => prev.includes(valor) ? prev.filter(v => v !== valor) : [...prev, valor]);
+  };
+
+  const handleSyncImagenes = async () => {
+    if (!window.confirm('¿Deseas propagar las imágenes a todos los artículos que comparten el mismo código y centro comercial?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tarifas/sync-imagenes`, { method: 'POST' });
+      const data = await res.json();
+      alert(data.message);
+    } catch (err) {
+      alert('Error al sincronizar imágenes: ' + err.message);
+    }
   };
 
   const fetchImageData = async (url) => {
@@ -269,6 +283,24 @@ function ProveedorPage() {
                 ))}
               </div>
             </div>
+
+            {puedeEditar && (
+              <>
+                <div className="border-t border-gray-100 mb-4" />
+                <div className="bg-indigo-50 rounded-xl p-3 mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-indigo-700">🖼️ Sincronizar Imágenes</p>
+                    <p className="text-xs text-indigo-500 mt-0.5">Propaga imágenes a artículos con el mismo código y centro comercial.</p>
+                  </div>
+                  <button
+                    onClick={handleSyncImagenes}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
+                  >
+                    Sincronizar
+                  </button>
+                </div>
+              </>
+            )}
 
             <p className="text-xs text-gray-400 mb-4">
               Se exportarán <strong className="text-gray-700">

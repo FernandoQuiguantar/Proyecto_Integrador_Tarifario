@@ -110,18 +110,6 @@ function UsuarioPage() {
     navigate('/login-usuario');
   };
 
-  const handleSyncImagenes = async () => {
-    if (!window.confirm('¿Deseas propagar las imágenes a todos los artículos que comparten el mismo código y centro comercial?')) return;
-    try {
-      const res = await fetch(`${API_BASE}/api/tarifas/sync-imagenes`, { method: 'POST' });
-      const data = await res.json();
-      alert(data.message);
-      if (data.actualizados > 0) fetchTarifas();
-    } catch (err) {
-      alert('Error al sincronizar imágenes: ' + err.message);
-    }
-  };
-
   const tarifasFiltradas = tarifas.filter(t => {
     const texto = busqueda.toLowerCase();
     const coincideTexto = !busqueda ||
@@ -314,20 +302,9 @@ function UsuarioPage() {
         {/* CATÁLOGO */}
         <div className="flex justify-between items-center mb-8 border-b-2 border-blue-100 pb-2">
           <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Catálogo de Servicios, Piezas y Materiales</h2>
-          <div className="flex items-center gap-3">
-            {puedeEditar && (
-              <button
-                onClick={handleSyncImagenes}
-                title="Copia la imagen de artículos que la tienen hacia los que comparten el mismo código y centro comercial"
-                className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors"
-              >
-                🖼️ Sincronizar Imágenes
-              </button>
-            )}
-            <span className="bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold">
-              {grupos.length} Artículos
-            </span>
-          </div>
+          <span className="bg-blue-900 text-white px-4 py-1 rounded-full text-xs font-bold">
+            {grupos.length} Artículos
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
