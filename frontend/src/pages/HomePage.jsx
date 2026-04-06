@@ -4,7 +4,7 @@ import { useAuth } from '../AuthContext';
 
 function HomePage() {
   const navigate = useNavigate();
-  const { account, loadingRol } = useAuth();
+  const { account, rol, loadingRol } = useAuth();
 
   useEffect(() => {
     if (!loadingRol && !account) navigate('/login-usuario');
@@ -57,17 +57,19 @@ function HomePage() {
               </p>
             </button>
 
-            {/* BOTÓN PROVEEDOR */}
-            <button
-              onClick={() => navigate('/proveedor')}
-              className="flex-1 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-8 rounded-2xl shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300 group"
-            >
-              <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🏢</div>
-              <h3 className="text-xl font-bold mb-2">Registrar Proveedores</h3>
-              <p className="text-emerald-200 text-sm">
-                Registre los precios del Proveedor
-              </p>
-            </button>
+            {/* BOTÓN PROVEEDOR — oculto para visor */}
+            {rol !== 'visor' && (
+              <button
+                onClick={() => navigate('/proveedor')}
+                className="flex-1 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white p-8 rounded-2xl shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300 group"
+              >
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🏢</div>
+                <h3 className="text-xl font-bold mb-2">Registrar Proveedores</h3>
+                <p className="text-emerald-200 text-sm">
+                  Registre los precios del Proveedor
+                </p>
+              </button>
+            )}
           </div>
         </div>
       </div>

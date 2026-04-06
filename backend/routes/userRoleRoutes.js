@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
     if (existe) return res.status(409).json({ message: 'Ya existe un usuario con ese correo' });
 
     const hash = await bcrypt.hash(password, 10);
-    const user = await UserRole.create({ email: email.toLowerCase().trim(), password: hash, rol: rol || 'usuario', nombre });
+    const user = await UserRole.create({ email: email.toLowerCase().trim(), password: hash, rol: rol || 'visor', nombre });
     res.status(201).json({ email: user.email, nombre: user.nombre, rol: user.rol });
   } catch (error) {
     res.status(500).json({ message: 'Error al crear usuario', error: error.message });

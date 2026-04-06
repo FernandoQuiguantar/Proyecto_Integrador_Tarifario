@@ -7,7 +7,7 @@ function AdminRolesPage() {
   const navigate = useNavigate();
   const { account, rol, loadingRol } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
-  const [form, setForm] = useState({ email: '', nombre: '', password: '', rol: 'usuario' });
+  const [form, setForm] = useState({ email: '', nombre: '', password: '', rol: 'visor' });
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ function AdminRolesPage() {
       const data = await res.json();
       if (res.ok) {
         setExito(`Usuario ${form.email} creado como ${form.rol}.`);
-        setForm({ email: '', nombre: '', password: '', rol: 'usuario' });
+        setForm({ email: '', nombre: '', password: '', rol: 'visor' });
         fetchUsuarios();
       } else {
         setError(data.message || 'Error al crear usuario.');
@@ -149,7 +149,8 @@ function AdminRolesPage() {
               <label className="text-xs font-bold text-gray-600 uppercase mb-1 block">Rol</label>
               <select value={form.rol} onChange={e => setForm({ ...form, rol: e.target.value })}
                 className="w-full p-2.5 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white transition-colors">
-                <option value="usuario">Usuario (solo lectura)</option>
+                <option value="visor">Visor (solo lectura del catálogo)</option>
+                <option value="editor">Editor (catálogo + proveedores)</option>
                 <option value="admin">Administrador (acceso total)</option>
               </select>
             </div>
@@ -191,9 +192,12 @@ function AdminRolesPage() {
                     <td className="px-4 py-3 text-center">
                       <select value={u.rol} onChange={e => handleChangeRol(u.email, e.target.value)}
                         className={`text-xs font-bold px-2 py-1 rounded-lg border outline-none cursor-pointer ${
-                          u.rol === 'admin' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                          u.rol === 'admin' ? 'bg-blue-50 text-blue-700 border-blue-200'
+                          : u.rol === 'editor' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-gray-50 text-gray-600 border-gray-200'
                         }`}>
-                        <option value="usuario">Usuario</option>
+                        <option value="visor">Visor</option>
+                        <option value="editor">Editor</option>
                         <option value="admin">Admin</option>
                       </select>
                     </td>

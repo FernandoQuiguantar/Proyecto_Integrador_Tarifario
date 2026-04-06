@@ -13,9 +13,10 @@ const UserRole = sequelize.define('UserRole', {
     allowNull: false,
   },
   rol: {
-    type: DataTypes.ENUM('admin', 'usuario'),
+    type: DataTypes.STRING(20),
     allowNull: false,
-    defaultValue: 'usuario',
+    defaultValue: 'visor',
+    validate: { isIn: [['admin', 'editor', 'visor']] },
   },
   nombre: {
     type: DataTypes.STRING,

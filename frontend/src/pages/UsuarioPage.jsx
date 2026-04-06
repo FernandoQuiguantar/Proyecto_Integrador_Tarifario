@@ -33,7 +33,8 @@ function UsuarioPage() {
 
   const API_URL = `${API_BASE}/api/tarifas`;
   const UPLOAD_URL = `${API_BASE}/api/upload`;
-  const esAdmin = rol === 'admin';
+  const puedeEditar = rol === 'admin' || rol === 'editor';
+  const puedeGestionar = rol === 'admin';
 
   const handleImagenChange = async (e) => {
     const file = e.target.files[0];
@@ -62,7 +63,7 @@ function UsuarioPage() {
   useEffect(() => {
     if (!loadingRol) {
       if (!account) { navigate('/login-usuario'); return; }
-      if (rol !== 'admin' && rol !== 'usuario') { navigate('/login-usuario'); return; }
+      if (rol !== 'admin' && rol !== 'editor' && rol !== 'visor') { navigate('/login-usuario'); return; }
       fetchTarifas();
     }
   }, [account, rol, loadingRol, navigate]);
@@ -158,7 +159,7 @@ function UsuarioPage() {
           <div className="flex-1">
             <h1 className="text-3xl font-bold tracking-tight mb-2 whitespace-nowrap">Tarifario SMO</h1>
             <p className="text-blue-200 text-sm mt-1 font-semibold">
-              {esAdmin ? 'Panel Administrador' : 'Panel de Usuario'} —{' '}
+              {puedeGestionar ? 'Panel Administrador' : puedeEditar ? 'Panel Editor' : 'Panel Visor'} —{' '}
               <span className="text-white">{account?.name || account?.username}</span>
             </p>
           </div>
@@ -169,7 +170,7 @@ function UsuarioPage() {
             <button onClick={() => navigate('/')} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
               ← Inicio
             </button>
-            {esAdmin && (
+            {puedeGestionar && (
               <button onClick={() => navigate('/admin/roles')} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
                 👥 Gestionar Accesos
               </button>
@@ -180,8 +181,8 @@ function UsuarioPage() {
           </div>
         </header>
 
-        {/* FORMULARIO — solo admin */}
-        {esAdmin && (
+        {/* FORMULARIO — admin y editor */}
+        {puedeEditar && (
           <div className="bg-white rounded-b-3xl shadow-xl border-x border-b border-gray-100 mb-8">
             <div className="flex justify-between items-center px-8 py-5 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
@@ -277,7 +278,7 @@ function UsuarioPage() {
         )}
 
         {/* BARRA DE BÚSQUEDA Y FILTROS */}
-        <div className={`bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-8 flex flex-col md:flex-row gap-4 ${!esAdmin ? 'rounded-t-3xl' : ''}`}>
+        <div className={`bg-white rounded-2xl shadow-md border border-gray-100 p-5 mb-8 flex flex-col md:flex-row gap-4 ${!puedeEditar ? 'rounded-t-3xl' : ''}`}>
           <div className="flex-1 relative">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -314,7 +315,7 @@ function UsuarioPage() {
         <div className="flex justify-between items-center mb-8 border-b-2 border-blue-100 pb-2">
           <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Catálogo de Servicios, Piezas y Materiales</h2>
           <div className="flex items-center gap-3">
-            {esAdmin && (
+            {puedeEditar && (
               <button
                 onClick={handleSyncImagenes}
                 title="Copia la imagen de artículos que la tienen hacia los que comparten el mismo código y centro comercial"
@@ -341,9 +342,9 @@ function UsuarioPage() {
               <Card
                 key={grupo[0].codigo}
                 grupo={grupo}
-                onDelete={esAdmin ? handleDelete : null}
-                onUpdate={esAdmin ? fetchTarifas : null}
-                soloLectura={!esAdmin}
+                onDelete={puedeEditar ? handleDelete : null}
+                onUpdate={puedeEditar ? fetchTarifas : null}
+                soloLectura={!puedeEditar}
               />
             ))
           )}
