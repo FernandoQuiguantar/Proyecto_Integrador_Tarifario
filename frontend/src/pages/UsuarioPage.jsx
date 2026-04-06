@@ -17,7 +17,7 @@ function UsuarioPage() {
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroCentro, setFiltroCentro] = useState('');
   const [pagina, setPagina] = useState(1);
-  const ITEMS_POR_PAGINA = 20;
+  const ITEMS_POR_PAGINA = 21;
 
   const [form, setForm] = useState({
     codigo: '',
