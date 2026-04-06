@@ -7,18 +7,18 @@ export function AuthProvider({ children }) {
   const [loadingRol, setLoadingRol] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('tarifario_user');
+    const stored = sessionStorage.getItem('tarifario_user');
     if (stored) setUser(JSON.parse(stored));
     setLoadingRol(false);
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem('tarifario_user', JSON.stringify(userData));
+    sessionStorage.setItem('tarifario_user', JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('tarifario_user');
+    sessionStorage.removeItem('tarifario_user');
     setUser(null);
   };
 
