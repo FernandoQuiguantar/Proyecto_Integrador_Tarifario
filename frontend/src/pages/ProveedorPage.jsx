@@ -95,6 +95,7 @@ function ProveedorPage() {
         cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1e3a5f' } };
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.protection = { locked: true };
       });
       headerRow.height = 22;
 
@@ -125,13 +126,15 @@ function ProveedorPage() {
 
         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
           if (colNumber === 11) {
-            // Col K: Mi Precio — resaltado en amarillo
+            // Col K: Mi Precio — editable, resaltado en amarillo
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF99' } };
             cell.font = { bold: true, color: { argb: 'FF1a6b3a' } };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.protection = { locked: false };
           } else {
             cell.font = { color: { argb: 'FF333333' } };
             cell.alignment = { vertical: 'middle' };
+            cell.protection = { locked: true };
             if (colNumber === 1) cell.font = { color: { argb: 'FF999999' }, size: 9 };
             if (colNumber === 10) cell.alignment = { horizontal: 'center', vertical: 'middle' };
           }
@@ -149,6 +152,21 @@ function ProveedorPage() {
         }
       });
 
+
+      // Proteger hoja: solo col K (precio) es editable
+      await sheet.protect('', {
+        selectLockedCells: true,
+        selectUnlockedCells: true,
+        autoFilter: true,
+        sort: true,
+        formatCells: false,
+        formatColumns: false,
+        formatRows: false,
+        insertColumns: false,
+        insertRows: false,
+        deleteColumns: false,
+        deleteRows: false,
+      });
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
