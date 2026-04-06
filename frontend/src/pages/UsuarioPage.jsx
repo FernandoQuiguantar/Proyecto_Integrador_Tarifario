@@ -16,6 +16,8 @@ function UsuarioPage() {
   const [busqueda, setBusqueda] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroCentro, setFiltroCentro] = useState('');
+  const [pagina, setPagina] = useState(1);
+  const ITEMS_POR_PAGINA = 20;
 
   const [form, setForm] = useState({
     codigo: '',
@@ -136,6 +138,8 @@ function UsuarioPage() {
     return acc;
   }, {});
   const grupos = Object.values(gruposMap);
+  const totalPaginas = Math.ceil(grupos.length / ITEMS_POR_PAGINA);
+  const gruposPagina = grupos.slice((pagina - 1) * ITEMS_POR_PAGINA, pagina * ITEMS_POR_PAGINA);
 
   if (loadingRol) {
     return (
@@ -278,11 +282,11 @@ function UsuarioPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
-            <input type="text" value={busqueda} onChange={e => setBusqueda(e.target.value)}
+            <input type="text" value={busqueda} onChange={e => { setBusqueda(e.target.value); setPagina(1); }}
               placeholder="Buscar por nombre, código o material..."
               className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-sm" />
           </div>
-          <select value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}
+          <select value={filtroCategoria} onChange={e => { setFiltroCategoria(e.target.value); setPagina(1); }}
             className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 text-sm min-w-[200px]">
             <option value="">Todas las categorías</option>
             <option value="Elemento iluminado">Elemento iluminado</option>
@@ -291,7 +295,7 @@ function UsuarioPage() {
             <option value="Piezas por metro cuadrado">Piezas por metro cuadrado</option>
             <option value="Servicio">Servicio</option>
           </select>
-          <select value={filtroCentro} onChange={e => setFiltroCentro(e.target.value)}
+          <select value={filtroCentro} onChange={e => { setFiltroCentro(e.target.value); setPagina(1); }}
             className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 text-sm min-w-[170px]">
             <option value="">Todos los centros</option>
             <option value="INMODIAMANTE">INMODIAMANTE</option>
@@ -299,7 +303,7 @@ function UsuarioPage() {
             <option value="CCI">CCI</option>
           </select>
           {(busqueda || filtroCategoria || filtroCentro) && (
-            <button onClick={() => { setBusqueda(''); setFiltroCategoria(''); setFiltroCentro(''); }}
+            <button onClick={() => { setBusqueda(''); setFiltroCategoria(''); setFiltroCentro(''); setPagina(1); }}
               className="text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors px-2">
               ✕ Limpiar
             </button>
@@ -333,7 +337,7 @@ function UsuarioPage() {
               </p>
             </div>
           ) : (
-            grupos.map(grupo => (
+            gruposPagina.map(grupo => (
               <Card
                 key={grupo[0].codigo}
                 grupo={grupo}
@@ -344,6 +348,70 @@ function UsuarioPage() {
             ))
           )}
         </div>
+
+        {/* PAGINACIÓN */}
+        {totalPaginas > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-10 mb-4 flex-wrap">
+            <button
+              onClick={() => { setPagina(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={pagina === 1}
+              className="px-3 py-2 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              «
+            </button>
+            <button
+              onClick={() => { setPagina(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={pagina === 1}
+              className="px-3 py-2 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              ‹
+            </button>
+
+            {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+              .filter(n => n === 1 || n === totalPaginas || Math.abs(n - pagina) <= 2)
+              .reduce((acc, n, idx, arr) => {
+                if (idx > 0 && n - arr[idx - 1] > 1) acc.push('...');
+                acc.push(n);
+                return acc;
+              }, [])
+              .map((item, idx) =>
+                item === '...' ? (
+                  <span key={`dots-${idx}`} className="px-2 text-gray-400 text-sm">…</span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => { setPagina(item); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className={`w-10 h-10 rounded-xl text-sm font-bold border-2 transition-all ${
+                      pagina === item
+                        ? 'bg-blue-900 border-blue-900 text-white'
+                        : 'border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+
+            <button
+              onClick={() => { setPagina(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={pagina === totalPaginas}
+              className="px-3 py-2 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              ›
+            </button>
+            <button
+              onClick={() => { setPagina(totalPaginas); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              disabled={pagina === totalPaginas}
+              className="px-3 py-2 rounded-xl text-sm font-bold border-2 border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              »
+            </button>
+
+            <span className="text-xs text-gray-400 ml-2">
+              Página {pagina} de {totalPaginas} — {grupos.length} artículos
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
