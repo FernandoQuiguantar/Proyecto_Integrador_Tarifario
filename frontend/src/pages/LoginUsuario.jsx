@@ -6,7 +6,7 @@ import API_BASE from '../config';
 function LoginUsuario() {
   const navigate = useNavigate();
   const { account, login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(''); // puede ser email o nombre de usuario
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,12 +65,12 @@ function LoginUsuario() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="flex flex-col">
-              <label className="text-sm font-bold text-gray-700 mb-1">Correo electrónico</label>
+              <label className="text-sm font-bold text-gray-700 mb-1">Correo o nombre de usuario</label>
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="usuario@smo.ec"
+                placeholder="usuario@smo.ec o nombre"
                 required
                 className="p-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-sm"
               />

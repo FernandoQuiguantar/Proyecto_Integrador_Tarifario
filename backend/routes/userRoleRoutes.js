@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const { Op } = require('sequelize');
 const UserRole = require('../models/UserRole');
 
 // POST /api/roles/login
@@ -9,7 +10,15 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Email y contraseña son obligatorios' });
 
-    const user = await UserRole.findByPk(email.toLowerCase().trim());
+    const identificador = email.toLowerCase().trim();
+    const user = await UserRole.findOne({
+      where: {
+        [Op.or]: [
+          { email: identificador },
+          { nombre: { [Op.iLike]: identificador } },
+        ],
+      },
+    });
     if (!user) return res.status(401).json({ message: 'Credenciales inválidas' });
 
     const valido = await bcrypt.compare(password, user.password);
