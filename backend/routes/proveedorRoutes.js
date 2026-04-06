@@ -47,4 +47,16 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/proveedores/:id - Eliminar proveedor
+router.delete('/:id', async (req, res) => {
+  try {
+    const proveedor = await Proveedor.findByPk(req.params.id);
+    if (!proveedor) return res.status(404).json({ message: 'Proveedor no encontrado' });
+    await proveedor.destroy();
+    res.json({ message: 'Proveedor eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar proveedor', error: error.message });
+  }
+});
+
 module.exports = router;

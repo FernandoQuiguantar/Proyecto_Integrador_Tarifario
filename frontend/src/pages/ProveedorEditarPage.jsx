@@ -246,10 +246,36 @@ function ProveedorEditarPage() {
             )}
 
             {selectedId && (
-              <button type="submit" disabled={loading}
-                className="bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-black py-3 rounded-xl text-sm transition-colors uppercase tracking-wide">
-                {loading ? 'Guardando...' : 'Guardar Cambios'}
-              </button>
+              <div className="flex flex-col gap-3">
+                <button type="submit" disabled={loading}
+                  className="bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-black py-3 rounded-xl text-sm transition-colors uppercase tracking-wide">
+                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+                <button type="button" disabled={loading}
+                  onClick={async () => {
+                    if (!window.confirm('¿Estás seguro de eliminar este proveedor? Se eliminarán también todos sus precios registrados.')) return;
+                    setLoading(true);
+                    try {
+                      const res = await fetch(`${API_BASE}/api/proveedores/${selectedId}`, { method: 'DELETE' });
+                      if (res.ok) {
+                        setProveedores(prev => prev.filter(p => String(p.id) !== String(selectedId)));
+                        setSelectedId('');
+                        setForm({ ruc: '', razon_social: '', correo: '', numero_contacto: '' });
+                        setMsg({ tipo: 'exito', texto: 'Proveedor eliminado correctamente.' });
+                      } else {
+                        const data = await res.json();
+                        setMsg({ tipo: 'error', texto: data.message || 'Error al eliminar proveedor.' });
+                      }
+                    } catch {
+                      setMsg({ tipo: 'error', texto: 'Error de conexión.' });
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 hover:border-red-500 font-bold py-3 rounded-xl text-sm transition-all uppercase tracking-wide">
+                  🗑️ Eliminar Proveedor
+                </button>
+              </div>
             )}
 
             <button type="button" onClick={() => navigate('/proveedor')}

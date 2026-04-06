@@ -162,6 +162,9 @@ function UsuarioPage() {
             <div className="bg-white p-4 rounded-xl shadow-md border-2 border-blue-100">
               <img src="https://smo.ec/wp-content/uploads/2024/11/cropped-Shop_Icono_LogoShoppingV22.png" alt="Logo" className="h-12 w-auto object-contain" />
             </div>
+            <button onClick={() => navigate('/')} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+              ← Inicio
+            </button>
             {esAdmin && (
               <button onClick={() => navigate('/admin/roles')} className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
                 👥 Gestionar Accesos
