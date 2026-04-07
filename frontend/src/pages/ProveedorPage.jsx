@@ -86,7 +86,23 @@ function ProveedorPage() {
 
       sheet.getColumn(9).hidden = true;  // Link Imagen (col I)
 
-      // Fila 1: encabezados
+      // Fila 1: identificación del proveedor
+      const proveedorRow = sheet.addRow(['Proveedor:', '', '', '', '', '', '', '', '', '', '']);
+      proveedorRow.height = 22;
+      proveedorRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.protection = { locked: colNumber !== 3 }; // solo C1 editable
+        if (colNumber === 1) {
+          cell.font = { bold: true, color: { argb: 'FF1e3a5f' }, size: 11 };
+          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        } else if (colNumber === 3) {
+          cell.font = { bold: true, size: 11 };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE599' } };
+          cell.alignment = { vertical: 'middle' };
+          cell.border = { bottom: { style: 'thin', color: { argb: 'FF1e3a5f' } } };
+        }
+      });
+
+      // Fila 2: encabezados
       const headerRow = sheet.addRow([
         'ID', 'Centro Comercial', 'Categoría', 'Código', 'Pieza',
         'Tipo Cotización', 'Especificación', 'Medida', 'Link Imagen', 'Imagen', 'Mi Precio (USD)',
@@ -99,8 +115,8 @@ function ProveedorPage() {
       });
       headerRow.height = 22;
 
-      // AutoFilter en fila 1 (A1:K1)
-      sheet.autoFilter = { from: 'A1', to: 'K1' };
+      // AutoFilter en fila 2 (A2:K2)
+      sheet.autoFilter = { from: 'A2', to: 'K2' };
 
       const filtradas = tarifas.filter(t =>
         exportCentros.includes(t.centro_comercial) &&
@@ -113,9 +129,9 @@ function ProveedorPage() {
         )
       );
 
-      // Datos desde fila 2
+      // Datos desde fila 3
       filtradas.forEach((t, idx) => {
-        const rowNum = idx + 2;
+        const rowNum = idx + 3;
         const row = sheet.addRow({
           id: t.id, cc: t.centro_comercial || '', categoria: t.categoria || '',
           codigo: t.codigo || '', pieza: t.pieza || '', tipo: t.cotizacion_tipo || '',
@@ -126,7 +142,7 @@ function ProveedorPage() {
 
         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
           if (colNumber === 11) {
-            // Col K: Mi Precio — editable, resaltado en amarillo
+            // Col K: Mi Precio — editable, solo numérico
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF99' } };
             cell.font = { bold: true, color: { argb: 'FF1a6b3a' } };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -150,6 +166,17 @@ function ProveedorPage() {
             editAs: 'oneCell',
           });
         }
+      });
+
+      // Validación numérica en col K (desde fila 3)
+      sheet.dataValidations.add(`K3:K1048576`, {
+        type: 'decimal',
+        operator: 'greaterThanOrEqual',
+        formulae: [0],
+        showErrorMessage: true,
+        errorStyle: 'stop',
+        errorTitle: 'Valor inválido',
+        error: 'Solo se permiten valores numéricos (ej: 12.50)',
       });
 
 
