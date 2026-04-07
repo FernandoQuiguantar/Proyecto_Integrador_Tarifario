@@ -68,14 +68,4 @@ router.get('/:tarifa_id', async (req, res) => {
   }
 });
 
-// DELETE /api/precios/all - Eliminar todos los precios (uso único de limpieza)
-router.delete('/all', async (req, res) => {
-  try {
-    const eliminados = await PrecioProveedor.destroy({ where: {}, truncate: true });
-    res.json({ message: 'Todos los precios eliminados', eliminados });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar precios', error: error.message });
-  }
-});
-
 module.exports = router;
