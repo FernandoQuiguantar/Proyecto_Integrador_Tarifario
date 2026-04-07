@@ -71,7 +71,7 @@ function ProveedorPage() {
 
       // Definir columnas sin header (los headers se agregan manualmente en fila 2)
       sheet.columns = [
-        { key: 'id',          width: 8  },
+        { key: 'id',          width: 14 },
         { key: 'cc',          width: 18 },
         { key: 'categoria',   width: 24 },
         { key: 'codigo',      width: 15 },
