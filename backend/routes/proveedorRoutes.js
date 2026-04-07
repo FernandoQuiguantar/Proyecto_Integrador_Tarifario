@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Proveedor = require('../models/Proveedor');
+const PrecioProveedor = require('../models/PrecioProveedor');
 
 // POST /api/proveedores - Registrar un nuevo proveedor
 router.post('/', async (req, res) => {
@@ -47,11 +48,12 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/proveedores/:id - Eliminar proveedor
+// DELETE /api/proveedores/:id - Eliminar proveedor y sus precios
 router.delete('/:id', async (req, res) => {
   try {
     const proveedor = await Proveedor.findByPk(req.params.id);
     if (!proveedor) return res.status(404).json({ message: 'Proveedor no encontrado' });
+    await PrecioProveedor.destroy({ where: { proveedor_email: proveedor.correo } });
     await proveedor.destroy();
     res.json({ message: 'Proveedor eliminado correctamente' });
   } catch (error) {
