@@ -195,6 +195,173 @@ function ProveedorPage() {
         deleteRows: false,
       });
 
+      // ── HOJA INSTRUCTIVO ──────────────────────────────────────────
+      const inst = workbook.addWorksheet('Instructivo');
+      inst.columns = [
+        { key: 'a', width: 28 },
+        { key: 'b', width: 70 },
+      ];
+
+      const COLOR_AZUL   = 'FF1e3a5f';
+      const COLOR_BLANCO = 'FFFFFFFF';
+      const COLOR_GRIS   = 'FFF2F2F2';
+      const COLOR_ROJO   = 'FFC0392B';
+      const COLOR_VERDE  = 'FF1a6b3a';
+      const COLOR_AMARI  = 'FFFFE599';
+
+      const addInstRow = (col1, col2, opts = {}) => {
+        const row = inst.addRow([col1, col2]);
+        row.height = opts.height || 18;
+        row.getCell(1).font      = { bold: opts.boldLeft  ?? false, color: { argb: opts.colorLeft  || 'FF333333' }, size: opts.size || 11 };
+        row.getCell(2).font      = { bold: opts.boldRight ?? false, color: { argb: opts.colorRight || 'FF333333' }, size: opts.size || 11 };
+        row.getCell(1).alignment = { vertical: 'middle', horizontal: opts.alignLeft  || 'left', wrapText: true };
+        row.getCell(2).alignment = { vertical: 'middle', horizontal: opts.alignRight || 'left', wrapText: true };
+        if (opts.fillLeft)  row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fillLeft  } };
+        if (opts.fillRight) row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fillRight } };
+        if (opts.fillBoth) {
+          row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fillBoth } };
+          row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: opts.fillBoth } };
+        }
+        row.eachCell({ includeEmpty: true }, cell => { cell.protection = { locked: true }; });
+        return row;
+      };
+
+      // Título principal
+      inst.mergeCells('A1:B1');
+      const tituloCell = inst.getCell('A1');
+      tituloCell.value     = 'INSTRUCTIVO — TARIFARIO SMO';
+      tituloCell.font      = { bold: true, color: { argb: COLOR_BLANCO }, size: 14 };
+      tituloCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      tituloCell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_AZUL } };
+      tituloCell.protection = { locked: true };
+      inst.getRow(1).height = 32;
+
+      inst.mergeCells('A2:B2');
+      const subCell = inst.getCell('A2');
+      subCell.value     = 'Guía para el correcto llenado del archivo de cotización';
+      subCell.font      = { italic: true, color: { argb: 'FF555555' }, size: 10 };
+      subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      subCell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EDF3' } };
+      subCell.protection = { locked: true };
+      inst.getRow(2).height = 20;
+
+      addInstRow('', '', { height: 8 });
+
+      // Sección: Campos del archivo
+      inst.mergeCells('A4:B4');
+      const sec1 = inst.getCell('A4');
+      sec1.value     = '📋  DESCRIPCIÓN DE CAMPOS';
+      sec1.font      = { bold: true, color: { argb: COLOR_BLANCO }, size: 11 };
+      sec1.alignment = { horizontal: 'left', vertical: 'middle' };
+      sec1.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_AZUL } };
+      sec1.protection = { locked: true };
+      inst.getRow(4).height = 22;
+
+      // Encabezado tabla
+      addInstRow('Campo', 'Descripción', {
+        boldLeft: true, boldRight: true,
+        colorLeft: COLOR_BLANCO, colorRight: COLOR_BLANCO,
+        fillBoth: 'FF2c5282', height: 20,
+      });
+
+      const campos = [
+        ['Proveedor (C1)',    'Escriba el nombre completo o razón social de su empresa. Es el único campo editable fuera de la columna de precios.'],
+        ['ID',               'Identificador interno del artículo. No modificar.'],
+        ['Centro Comercial', 'Mall o centro al que pertenece el artículo (INMODIAMANTE, CONDADO, CCI). No modificar.'],
+        ['Categoría',        'Tipo de material o servicio (ej: Elemento iluminado, Material impreso). No modificar.'],
+        ['Código',           'Código único del artículo en el sistema. No modificar.'],
+        ['Pieza',            'Nombre descriptivo del material o servicio. No modificar.'],
+        ['Tipo Cotización',  'Indica si es Mantenimiento, Brandeo, Nuevo o Comprar Nuevo. No modificar.'],
+        ['Especificación',   'Detalle técnico del material (tipo de vinil, estructura, acabado, etc.). No modificar.'],
+        ['Medida',           'Dimensiones del artículo (ej: 2x3 mts). No modificar.'],
+        ['Imagen',           'Fotografía de referencia del artículo. Solo visual, no modificar.'],
+        ['Mi Precio (USD)',  'ÚNICO CAMPO QUE DEBE LLENAR. Ingrese su precio en dólares (USD) con hasta 2 decimales. Ej: 45.00'],
+      ];
+
+      campos.forEach(([ campo, desc ], i) => {
+        const esPrecio = campo.includes('Precio');
+        addInstRow(campo, desc, {
+          boldLeft:   esPrecio,
+          boldRight:  esPrecio,
+          colorLeft:  esPrecio ? COLOR_VERDE  : 'FF1e3a5f',
+          colorRight: esPrecio ? COLOR_VERDE  : 'FF333333',
+          fillBoth:   esPrecio ? COLOR_AMARI  : (i % 2 === 0 ? COLOR_GRIS : COLOR_BLANCO),
+          height: 30,
+        });
+      });
+
+      addInstRow('', '', { height: 8 });
+
+      // Sección: Reglas
+      const rFila = inst.rowCount + 1;
+      inst.mergeCells(`A${rFila}:B${rFila}`);
+      const sec2 = inst.getCell(`A${rFila}`);
+      sec2.value     = '⚠️  RESTRICCIONES — LO QUE NO PUEDE HACER';
+      sec2.font      = { bold: true, color: { argb: COLOR_BLANCO }, size: 11 };
+      sec2.alignment = { horizontal: 'left', vertical: 'middle' };
+      sec2.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_ROJO } };
+      sec2.protection = { locked: true };
+      inst.getRow(rFila).height = 22;
+
+      const restricciones = [
+        ['❌  Modificar celdas bloqueadas',   'Todos los campos excepto "Proveedor" (C1) y "Mi Precio" (col K) están protegidos. No intente desbloquear la hoja.'],
+        ['❌  Ingresar texto en Mi Precio',    'La columna K solo acepta valores numéricos (decimales). Si escribe letras o símbolos, el sistema lo rechazará.'],
+        ['❌  Dejar el nombre de proveedor vacío', 'La celda C1 debe contener el nombre de su empresa antes de enviar el archivo.'],
+        ['❌  Agregar o eliminar filas/columnas', 'La estructura del archivo no debe modificarse. Agregar o borrar filas o columnas invalidará el archivo.'],
+        ['❌  Cambiar el nombre de la hoja',   'La hoja "Tarifario" debe mantener su nombre original para que el sistema pueda procesarla correctamente.'],
+        ['❌  Enviar precios en cero o negativos', 'Los precios deben ser mayores a cero. Un precio de 0 se interpretará como "sin oferta".'],
+        ['❌  Modificar el formato de las celdas', 'No cambiar fuentes, colores ni bordes de las celdas bloqueadas.'],
+      ];
+
+      restricciones.forEach(([ titulo, desc ], i) => {
+        addInstRow(titulo, desc, {
+          boldLeft:   true,
+          colorLeft:  COLOR_ROJO,
+          colorRight: 'FF555555',
+          fillBoth:   i % 2 === 0 ? 'FFFFF0F0' : COLOR_BLANCO,
+          height: 30,
+        });
+      });
+
+      addInstRow('', '', { height: 8 });
+
+      // Sección: Pasos
+      const pFila = inst.rowCount + 1;
+      inst.mergeCells(`A${pFila}:B${pFila}`);
+      const sec3 = inst.getCell(`A${pFila}`);
+      sec3.value     = '✅  PASOS PARA COMPLETAR EL ARCHIVO';
+      sec3.font      = { bold: true, color: { argb: COLOR_BLANCO }, size: 11 };
+      sec3.alignment = { horizontal: 'left', vertical: 'middle' };
+      sec3.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: COLOR_VERDE } };
+      sec3.protection = { locked: true };
+      inst.getRow(pFila).height = 22;
+
+      const pasos = [
+        ['Paso 1', 'Abra la hoja "Tarifario" del archivo.'],
+        ['Paso 2', 'En la celda C1 (fondo amarillo), escriba el nombre de su empresa o razón social.'],
+        ['Paso 3', 'Revise los artículos listados. Puede usar los filtros de la fila 2 para encontrar los que le corresponden.'],
+        ['Paso 4', 'En la columna K "Mi Precio (USD)", ingrese su precio para cada artículo que desea cotizar.'],
+        ['Paso 5', 'Deje en blanco las filas de artículos que no desea cotizar.'],
+        ['Paso 6', 'Guarde el archivo y envíelo al contacto de SMO indicado.'],
+      ];
+
+      pasos.forEach(([ paso, desc ], i) => {
+        addInstRow(paso, desc, {
+          boldLeft:   true,
+          colorLeft:  COLOR_VERDE,
+          colorRight: 'FF333333',
+          fillBoth:   i % 2 === 0 ? 'FFf0fff4' : COLOR_BLANCO,
+          height: 26,
+        });
+      });
+
+      // Proteger hoja instructivo (solo lectura total)
+      await inst.protect('', {
+        selectLockedCells:   true,
+        selectUnlockedCells: true,
+      });
+      // ── FIN HOJA INSTRUCTIVO ──────────────────────────────────────
+
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob);
