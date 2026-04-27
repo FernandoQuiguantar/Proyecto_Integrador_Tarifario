@@ -41,7 +41,7 @@ function LoginProveedor() {
         <header className="bg-[#1e3a5f] text-white p-8 rounded-t-3xl flex justify-between items-center shadow-2xl">
           <div className="flex-1">
             <h1 className="text-2xl font-bold tracking-tight mb-1">
-              Tarifario de Marketing
+              Tarifario SMO
             </h1>
             <p className="text-emerald-300 text-sm font-semibold">
               Inicio de Sesión - Proveedor
