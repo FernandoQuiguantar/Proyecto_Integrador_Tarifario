@@ -1,1 +1,3 @@
-module.exports = require('../app');
+module.exports = (req, res) => {
+  res.json({ ok: true, msg: 'minimal test' });
+};
