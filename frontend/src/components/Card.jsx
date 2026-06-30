@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import MyButton from './MyButton';
+import SelectWithNew from './SelectWithNew';
 import API_BASE from '../config';
 
 const API_URL = `${API_BASE}/api/tarifas`;
 
-const CATEGORIAS = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 const CENTROS = ['INMODIAMANTE', 'CONDADO', 'CCI'];
-const TIPOS = ['Mantenimiento', 'Brandeo', 'Nuevo', 'Comprar nuevo', 'Servicio'];
+const TIPOS_DEFAULT = ['Brandeo', 'Comprar Nuevo', 'Mantenimiento', 'Nuevo', 'Servicio'];
+const CATEGORIAS_DEFAULT = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 
 const TIPO_COLORS = {
   'Mantenimiento': 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200',
@@ -25,7 +26,7 @@ const TIPO_ACTIVE = {
 
 const PRECIOS_URL = `${API_BASE}/api/precios`;
 
-const Card = ({ grupo, onDelete, onUpdate, soloLectura = false }) => {
+const Card = ({ grupo, onDelete, onUpdate, soloLectura = false, tipos = TIPOS_DEFAULT, categorias = CATEGORIAS_DEFAULT }) => {
   const base = grupo[0];
   const [activoId, setActivoId] = useState(null);
   const [precios, setPrecios] = useState([]);
@@ -391,11 +392,14 @@ const Card = ({ grupo, onDelete, onUpdate, soloLectura = false }) => {
 
               {/* Campos editables */}
               <div className={añadirForm.imagen_url ? '' : 'md:col-span-2'}>
-                <label className="text-xs font-bold text-emerald-700 uppercase mb-1 block">Tipo de Cotización *</label>
-                <select className="w-full p-2.5 border-2 border-emerald-300 rounded-xl text-sm outline-none focus:border-emerald-500 bg-white"
-                  value={añadirForm.cotizacion_tipo} onChange={e => setAñadirForm({...añadirForm, cotizacion_tipo: e.target.value})}>
-                  {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <SelectWithNew
+                  label="Tipo de Cotización *"
+                  labelClass="text-xs font-bold text-emerald-700 uppercase mb-1 block"
+                  className="w-full p-2.5 border-2 border-emerald-300 rounded-xl text-sm outline-none focus:border-emerald-500 bg-white"
+                  options={tipos}
+                  value={añadirForm.cotizacion_tipo}
+                  onChange={v => setAñadirForm({...añadirForm, cotizacion_tipo: v})}
+                />
               </div>
               <div className="md:col-span-2">
                 <label className="text-xs font-bold text-emerald-700 uppercase mb-1 block">Descripción del Material *</label>
@@ -447,11 +451,14 @@ const Card = ({ grupo, onDelete, onUpdate, soloLectura = false }) => {
                   value={editForm.codigo} onChange={e => setEditForm({...editForm, codigo: e.target.value})} />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-600 uppercase mb-1 block">Tipo de Cotización</label>
-                <select className="w-full p-2.5 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white"
-                  value={editForm.cotizacion_tipo} onChange={e => setEditForm({...editForm, cotizacion_tipo: e.target.value})}>
-                  {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <SelectWithNew
+                  label="Tipo de Cotización"
+                  labelClass="text-xs font-bold text-gray-600 uppercase mb-1 block"
+                  className="w-full p-2.5 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white"
+                  options={tipos}
+                  value={editForm.cotizacion_tipo}
+                  onChange={v => setEditForm({...editForm, cotizacion_tipo: v})}
+                />
               </div>
               <div className="md:col-span-2">
                 <label className="text-xs font-bold text-gray-600 uppercase mb-1 block">Nombre de la Pieza</label>
@@ -474,11 +481,14 @@ const Card = ({ grupo, onDelete, onUpdate, soloLectura = false }) => {
                   value={editForm.cantidad} onChange={e => setEditForm({...editForm, cantidad: e.target.value})} />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-600 uppercase mb-1 block">Categoría</label>
-                <select className="w-full p-2.5 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white"
-                  value={editForm.categoria} onChange={e => setEditForm({...editForm, categoria: e.target.value})}>
-                  {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <SelectWithNew
+                  label="Categoría"
+                  labelClass="text-xs font-bold text-gray-600 uppercase mb-1 block"
+                  className="w-full p-2.5 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white"
+                  options={categorias}
+                  value={editForm.categoria}
+                  onChange={v => setEditForm({...editForm, categoria: v})}
+                />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-600 uppercase mb-1 block">Centro Comercial</label>

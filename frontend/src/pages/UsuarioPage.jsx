@@ -4,6 +4,8 @@ import { useAuth } from '../AuthContext';
 import MyButton from '../components/MyButton';
 import MyInput from '../components/MyInput';
 import Card from '../components/Card';
+import SelectWithNew from '../components/SelectWithNew';
+import { useOpciones } from '../hooks/useOpciones';
 import API_BASE from '../config';
 
 function UsuarioPage() {
@@ -30,6 +32,8 @@ function UsuarioPage() {
     centro_comercial: 'INMODIAMANTE',
     imagen_url: ''
   });
+
+  const { tipos, categorias } = useOpciones();
 
   const API_URL = `${API_BASE}/api/tarifas`;
   const UPLOAD_URL = `${API_BASE}/api/upload`;
@@ -199,15 +203,15 @@ function UsuarioPage() {
                     <MyInput label="Nombre de la Pieza" value={form.pieza} onChange={e => setForm({...form, pieza: e.target.value})} placeholder="Ej: Gigantografía Exterior" />
                   </div>
 
-                  <div className="flex flex-col">
-                    <label className="text-sm font-bold text-gray-700 mb-1">Tipo de Cotización</label>
-                    <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                      value={form.cotizacion_tipo} onChange={e => setForm({...form, cotizacion_tipo: e.target.value})}>
-                      <option value="Mantenimiento">Mantenimiento</option>
-                      <option value="Brandeo">Brandeo</option>
-                      <option value="Nuevo">Nuevo</option>
-                      <option value="Comprar Nuevo">Comprar Nuevo</option>
-                    </select>
+                  <div>
+                    <SelectWithNew
+                      label="Tipo de Cotización"
+                      labelClass="text-sm font-bold text-gray-700 mb-1 block"
+                      className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors w-full"
+                      options={tipos}
+                      value={form.cotizacion_tipo}
+                      onChange={v => setForm({...form, cotizacion_tipo: v})}
+                    />
                   </div>
 
                   <div className="lg:col-span-3 flex flex-col">
@@ -224,16 +228,15 @@ function UsuarioPage() {
                   <MyInput label="Medida" value={form.medida} onChange={e => setForm({...form, medida: e.target.value})} placeholder="Ej: 2x3 mts" />
                   <MyInput label="Cantidad" type="number" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} placeholder="0" />
 
-                  <div className="flex flex-col">
-                    <label className="text-sm font-bold text-gray-700 mb-1">Categoría</label>
-                    <select className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors"
-                      value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>
-                      <option value="Elemento iluminado">Elemento iluminado</option>
-                      <option value="Estructura física">Estructura física</option>
-                      <option value="Material impreso">Material impreso</option>
-                      <option value="Piezas por metro cuadrado">Piezas por metro cuadrado</option>
-                      <option value="Servicio">Servicio</option>
-                    </select>
+                  <div>
+                    <SelectWithNew
+                      label="Categoría"
+                      labelClass="text-sm font-bold text-gray-700 mb-1 block"
+                      className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 transition-colors w-full"
+                      options={categorias}
+                      value={form.categoria}
+                      onChange={v => setForm({...form, categoria: v})}
+                    />
                   </div>
 
                   <div className="flex flex-col">
@@ -278,11 +281,7 @@ function UsuarioPage() {
           <select value={filtroCategoria} onChange={e => { setFiltroCategoria(e.target.value); setPagina(1); }}
             className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 text-sm min-w-[200px]">
             <option value="">Todas las categorías</option>
-            <option value="Elemento iluminado">Elemento iluminado</option>
-            <option value="Estructura física">Estructura física</option>
-            <option value="Material impreso">Material impreso</option>
-            <option value="Piezas por metro cuadrado">Piezas por metro cuadrado</option>
-            <option value="Servicio">Servicio</option>
+            {categorias.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <select value={filtroCentro} onChange={e => { setFiltroCentro(e.target.value); setPagina(1); }}
             className="p-2.5 border-2 border-gray-200 rounded-xl bg-white outline-none focus:border-blue-500 text-sm min-w-[170px]">
@@ -322,6 +321,8 @@ function UsuarioPage() {
                 onDelete={puedeEditar ? handleDelete : null}
                 onUpdate={puedeEditar ? fetchTarifas : null}
                 soloLectura={!puedeEditar}
+                tipos={tipos}
+                categorias={categorias}
               />
             ))
           )}

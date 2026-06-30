@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const precioProveedorRoutes = require('./routes/precioProveedorRoutes');
 const proveedorRoutes = require('./routes/proveedorRoutes');
 const userRoleRoutes = require('./routes/userRoleRoutes');
+const opcionesRoutes = require('./routes/opcionesRoutes');
 require('./models/PrecioProveedor');
 require('./models/Proveedor');
 require('./models/UserRole');
@@ -59,6 +60,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/precios', precioProveedorRoutes);
 app.use('/api/proveedores', proveedorRoutes);
 app.use('/api/roles', userRoleRoutes);
+app.use('/api/opciones', opcionesRoutes);
 
 // En Vercel (serverless) solo exportamos el app sin listen ni sync
 if (!process.env.VERCEL) {
