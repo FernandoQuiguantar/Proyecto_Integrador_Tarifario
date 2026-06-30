@@ -43,6 +43,16 @@ app.post('/api/upload', upload.single('imagen'), async (req, res) => {
   }
 });
 
+// Health check (sin DB)
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    vercel: !!process.env.VERCEL,
+    hasDb: !!process.env.DATABASE_URL,
+    node: process.version,
+  });
+});
+
 // Rutas
 app.use('/api/tarifas', tarifaRoutes);
 app.use('/api/auth', authRoutes);
