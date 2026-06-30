@@ -1,0 +1,27 @@
+name: Promote backend to production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deployment
+        run: sleep 60
+
+      - name: Promote latest deployment to production alias
+        run: |
+          LATEST=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            "https://api.vercel.com/v6/deployments?teamId=team_alHPLZc66VtDKZQAV66HPNNM&projectId=prj_WBhhKb1LVuHnIpsH2e7FGPHLgvuS&limit=1&target=production" \
+            | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['deployments'][0]['url'])")
+          echo "Latest deployment: $LATEST"
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"alias\":\"tarifariosmo.vercel.app\",\"deployment\":\"$LATEST\"}" \
+            "https://api.vercel.com/v2/deployments/$LATEST/aliases?teamId=team_alHPLZc66VtDKZQAV66HPNNM"
