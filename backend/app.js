@@ -50,31 +50,33 @@ app.use('/api/precios', precioProveedorRoutes);
 app.use('/api/proveedores', proveedorRoutes);
 app.use('/api/roles', userRoleRoutes);
 
-// Sincronización con BD
-const PORT = process.env.PORT || 3000;
+// En Vercel (serverless) solo exportamos el app sin listen ni sync
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
 
-async function iniciarServidor() {
-  try {
-    // Migración manual: convertir columna rol de ENUM a VARCHAR si es necesario
-    await sequelize.query(`
-      DO $$
-      BEGIN
-        IF EXISTS (
-          SELECT 1 FROM information_schema.columns
-          WHERE table_name = 'user_roles'
-            AND column_name = 'rol'
-            AND udt_name LIKE 'enum_%'
-        ) THEN
-          ALTER TABLE user_roles ALTER COLUMN rol TYPE VARCHAR(20) USING rol::TEXT;
-        END IF;
-      END $$;
-    `);
-
-    await sequelize.sync({ alter: true });
-    app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
-  } catch (err) {
-    console.error('Error conectando a la DB:', err);
+  async function iniciarServidor() {
+    try {
+      await sequelize.query(`
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'user_roles'
+              AND column_name = 'rol'
+              AND udt_name LIKE 'enum_%'
+          ) THEN
+            ALTER TABLE user_roles ALTER COLUMN rol TYPE VARCHAR(20) USING rol::TEXT;
+          END IF;
+        END $$;
+      `);
+      await sequelize.sync({ alter: true });
+      app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
+    } catch (err) {
+      console.error('Error conectando a la DB:', err.message);
+    }
   }
+
+  iniciarServidor();
 }
 
-iniciarServidor();
+module.exports = app;
