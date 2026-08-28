@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import API_BASE from '../config';
+import { validarProveedor } from '../utils/validation';
 
 function ProveedorEditarPage() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function ProveedorEditarPage() {
   const [proveedores, setProveedores] = useState([]);
   const [selectedId, setSelectedId] = useState(searchParams.get('id') || '');
   const [form, setForm] = useState({ ruc: '', razon_social: '', correo: '', numero_contacto: '' });
+  const [errores, setErrores] = useState({});
   const [archivo, setArchivo] = useState(null);
   const [preciosParseados, setPreciosParseados] = useState(null);
   const [parseError, setParseError] = useState(null);
@@ -38,6 +40,7 @@ function ProveedorEditarPage() {
   const handleSelectProveedor = (id) => {
     setSelectedId(id);
     setMsg(null);
+    setErrores({});
     setArchivo(null);
     setPreciosParseados(null);
     setParseError(null);
@@ -89,8 +92,10 @@ function ProveedorEditarPage() {
       return;
     }
     const { ruc, razon_social, correo, numero_contacto } = form;
-    if (!ruc || !razon_social || !correo || !numero_contacto) {
-      setMsg({ tipo: 'error', texto: 'Todos los campos son requeridos.' });
+    const erroresValidacion = validarProveedor(form);
+    setErrores(erroresValidacion);
+    if (Object.keys(erroresValidacion).length > 0) {
+      setMsg({ tipo: 'error', texto: 'Revisa los campos marcados en rojo.' });
       return;
     }
 
@@ -187,7 +192,8 @@ function ProveedorEditarPage() {
                   <label className="text-xs font-bold text-gray-500 uppercase">RUC</label>
                   <input type="text" maxLength={13} value={form.ruc}
                     onChange={e => setForm(p => ({ ...p, ruc: e.target.value }))}
-                    className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-amber-500 transition-colors" />
+                    className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.ruc ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-amber-500'}`} />
+                  {errores.ruc && <p className="text-xs font-semibold text-red-600">{errores.ruc}</p>}
                 </div>
 
                 {/* Razón Social */}
@@ -195,7 +201,8 @@ function ProveedorEditarPage() {
                   <label className="text-xs font-bold text-gray-500 uppercase">Razón Social</label>
                   <input type="text" value={form.razon_social}
                     onChange={e => setForm(p => ({ ...p, razon_social: e.target.value }))}
-                    className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-amber-500 transition-colors" />
+                    className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.razon_social ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-amber-500'}`} />
+                  {errores.razon_social && <p className="text-xs font-semibold text-red-600">{errores.razon_social}</p>}
                 </div>
 
                 {/* Correo */}
@@ -203,7 +210,8 @@ function ProveedorEditarPage() {
                   <label className="text-xs font-bold text-gray-500 uppercase">Correo</label>
                   <input type="email" value={form.correo}
                     onChange={e => setForm(p => ({ ...p, correo: e.target.value }))}
-                    className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-amber-500 transition-colors" />
+                    className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.correo ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-amber-500'}`} />
+                  {errores.correo && <p className="text-xs font-semibold text-red-600">{errores.correo}</p>}
                 </div>
 
                 {/* Número de Contacto */}
@@ -211,7 +219,8 @@ function ProveedorEditarPage() {
                   <label className="text-xs font-bold text-gray-500 uppercase">Número de Contacto</label>
                   <input type="tel" value={form.numero_contacto}
                     onChange={e => setForm(p => ({ ...p, numero_contacto: e.target.value }))}
-                    className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-amber-500 transition-colors" />
+                    className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.numero_contacto ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-amber-500'}`} />
+                  {errores.numero_contacto && <p className="text-xs font-semibold text-red-600">{errores.numero_contacto}</p>}
                 </div>
 
                 {/* Cargar nuevo Excel (opcional) */}

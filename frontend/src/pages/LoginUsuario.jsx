@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import API_BASE from '../config';
+import { validarLogin } from '../utils/validation';
 
 function LoginUsuario() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function LoginUsuario() {
   const [email, setEmail] = useState(''); // puede ser email o nombre de usuario
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [erroresCampos, setErroresCampos] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -18,6 +20,13 @@ function LoginUsuario() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    const erroresValidacion = validarLogin({ identificador: email, password });
+    setErroresCampos(erroresValidacion);
+    if (Object.keys(erroresValidacion).length > 0) {
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/roles/login`, {
@@ -72,8 +81,9 @@ function LoginUsuario() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="usuario"
                 required
-                className="p-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-sm"
+                className={`p-2.5 border-2 rounded-xl outline-none transition-colors text-sm ${erroresCampos.identificador ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
               />
+              {erroresCampos.identificador && <p className="text-xs font-semibold text-red-500 mt-1">{erroresCampos.identificador}</p>}
             </div>
             <div className="flex flex-col">
               <label className="text-sm font-bold text-gray-700 mb-1">Contraseña</label>
@@ -83,8 +93,9 @@ function LoginUsuario() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="p-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 transition-colors text-sm"
+                className={`p-2.5 border-2 rounded-xl outline-none transition-colors text-sm ${erroresCampos.password ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
               />
+              {erroresCampos.password && <p className="text-xs font-semibold text-red-500 mt-1">{erroresCampos.password}</p>}
             </div>
 
             {error && (

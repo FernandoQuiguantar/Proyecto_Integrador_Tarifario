@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_BASE from '../config';
+import { validarProveedor } from '../utils/validation';
 
 const FORM_INITIAL = { ruc: '', razon_social: '', correo: '', numero_contacto: '' };
 
@@ -9,6 +10,7 @@ function ProveedorRegistroPage() {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState(FORM_INITIAL);
+  const [errores, setErrores] = useState({});
   const [archivo, setArchivo] = useState(null);
   const [preciosParseados, setPreciosParseados] = useState(null); // { count, precios[] }
   const [parseError, setParseError] = useState(null);
@@ -50,8 +52,10 @@ function ProveedorRegistroPage() {
     e.preventDefault();
     const { ruc, razon_social, correo, numero_contacto } = form;
 
-    if (!ruc || !razon_social || !correo || !numero_contacto) {
-      setMsg({ tipo: 'error', texto: 'Todos los campos del formulario son requeridos.' });
+    const erroresValidacion = validarProveedor(form);
+    setErrores(erroresValidacion);
+    if (Object.keys(erroresValidacion).length > 0) {
+      setMsg({ tipo: 'error', texto: 'Revisa los campos marcados en rojo.' });
       return;
     }
     if (!preciosParseados || preciosParseados.count === 0) {
@@ -99,6 +103,7 @@ function ProveedorRegistroPage() {
         texto: `Proveedor "${razon_social}" registrado. ${ok} precio${ok !== 1 ? 's' : ''} cargado${ok !== 1 ? 's' : ''} correctamente.${fail > 0 ? ` ${fail} error(es).` : ''}`,
       });
       setForm(FORM_INITIAL);
+      setErrores({});
       setArchivo(null);
       setPreciosParseados(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -134,7 +139,8 @@ function ProveedorRegistroPage() {
               <input type="text" maxLength={13} value={form.ruc}
                 onChange={e => setForm(p => ({ ...p, ruc: e.target.value }))}
                 placeholder="Ej: 1234567890001"
-                className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500 transition-colors" />
+                className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.ruc ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-emerald-500'}`} />
+              {errores.ruc && <p className="text-xs font-semibold text-red-600">{errores.ruc}</p>}
             </div>
 
             {/* Razón Social */}
@@ -143,7 +149,8 @@ function ProveedorRegistroPage() {
               <input type="text" value={form.razon_social}
                 onChange={e => setForm(p => ({ ...p, razon_social: e.target.value }))}
                 placeholder="Nombre de la empresa"
-                className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500 transition-colors" />
+                className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.razon_social ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-emerald-500'}`} />
+              {errores.razon_social && <p className="text-xs font-semibold text-red-600">{errores.razon_social}</p>}
             </div>
 
             {/* Correo */}
@@ -152,7 +159,8 @@ function ProveedorRegistroPage() {
               <input type="email" value={form.correo}
                 onChange={e => setForm(p => ({ ...p, correo: e.target.value }))}
                 placeholder="correo@empresa.com"
-                className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500 transition-colors" />
+                className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.correo ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-emerald-500'}`} />
+              {errores.correo && <p className="text-xs font-semibold text-red-600">{errores.correo}</p>}
             </div>
 
             {/* Número de Contacto */}
@@ -161,7 +169,8 @@ function ProveedorRegistroPage() {
               <input type="tel" value={form.numero_contacto}
                 onChange={e => setForm(p => ({ ...p, numero_contacto: e.target.value }))}
                 placeholder="Ej: 0991234567"
-                className="p-3 border-2 border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500 transition-colors" />
+                className={`p-3 border-2 rounded-xl text-sm outline-none transition-colors ${errores.numero_contacto ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-emerald-500'}`} />
+              {errores.numero_contacto && <p className="text-xs font-semibold text-red-600">{errores.numero_contacto}</p>}
             </div>
 
             {/* Cargar Excel */}

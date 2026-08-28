@@ -3,13 +3,37 @@ const router = express.Router();
 const Proveedor = require('../models/Proveedor');
 const PrecioProveedor = require('../models/PrecioProveedor');
 
+const RUC_REGEX = /^\d{13}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TELEFONO_REGEX = /^\d{7,10}$/;
+
+function validarDatosProveedor({ ruc, razon_social, correo, numero_contacto }) {
+  if (!ruc || !razon_social || !correo || !numero_contacto) {
+    return 'Todos los campos son requeridos';
+  }
+  if (!RUC_REGEX.test(String(ruc).trim())) {
+    return 'El RUC debe tener exactamente 13 dígitos numéricos';
+  }
+  if (String(razon_social).trim().length < 3) {
+    return 'La razón social debe tener al menos 3 caracteres';
+  }
+  if (!EMAIL_REGEX.test(String(correo).trim())) {
+    return 'El correo electrónico no es válido';
+  }
+  if (!TELEFONO_REGEX.test(String(numero_contacto).trim())) {
+    return 'El número de contacto debe tener entre 7 y 10 dígitos numéricos';
+  }
+  return null;
+}
+
 // POST /api/proveedores - Registrar un nuevo proveedor
 router.post('/', async (req, res) => {
   try {
     const { ruc, razon_social, correo, numero_contacto } = req.body;
 
-    if (!ruc || !razon_social || !correo || !numero_contacto) {
-      return res.status(400).json({ message: 'Todos los campos son requeridos' });
+    const errorValidacion = validarDatosProveedor(req.body);
+    if (errorValidacion) {
+      return res.status(400).json({ message: errorValidacion });
     }
 
     const nuevo = await Proveedor.create({ ruc, razon_social, correo, numero_contacto });
@@ -37,6 +61,12 @@ router.put('/:id', async (req, res) => {
   try {
     const proveedor = await Proveedor.findByPk(req.params.id);
     if (!proveedor) return res.status(404).json({ message: 'Proveedor no encontrado' });
+
+    const errorValidacion = validarDatosProveedor(req.body);
+    if (errorValidacion) {
+      return res.status(400).json({ message: errorValidacion });
+    }
+
     const { ruc, razon_social, correo, numero_contacto } = req.body;
     await proveedor.update({ ruc, razon_social, correo, numero_contacto });
     res.json(proveedor);
