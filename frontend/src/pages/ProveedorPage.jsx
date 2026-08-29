@@ -271,7 +271,7 @@ function ProveedorPage() {
         ['Categoría',        'Tipo de material o servicio (ej: Elemento iluminado, Material impreso). No modificar.'],
         ['Código',           'Código único del artículo en el sistema. No modificar.'],
         ['Pieza',            'Nombre descriptivo del material o servicio. No modificar.'],
-        ['Tipo Cotización',  'Indica si es Mantenimiento, Brandeo, Nuevo o Comprar Nuevo. No modificar.'],
+        ['Tipo Cotización',  'Indica si es Mantenimiento, Brandeo, Nuevo o Servicio. No modificar.'],
         ['Especificación',   'Detalle técnico del material (tipo de vinil, estructura, acabado, etc.). No modificar.'],
         ['Medida',           'Dimensiones del artículo (ej: 2x3 mts). No modificar.'],
         ['Imagen',           'Fotografía de referencia del artículo. Solo visual, no modificar.'],
