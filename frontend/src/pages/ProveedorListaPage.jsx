@@ -4,6 +4,11 @@ import API_BASE from '../config';
 
 const CENTROS = ['CCI', 'CONDADO', 'INMODIAMANTE'];
 
+const formatearFecha = (iso) => {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 function ProveedorListaPage() {
   const navigate = useNavigate();
   const [proveedores, setProveedores] = useState([]);
@@ -92,7 +97,14 @@ function ProveedorListaPage() {
 
                       {/* Datos del proveedor */}
                       <div className="flex flex-col gap-1 flex-1">
-                        <h3 className="text-base font-black text-gray-800">{p.razon_social}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-base font-black text-gray-800">{p.razon_social}</h3>
+                          {formatearFecha(p.createdAt) && (
+                            <span className="bg-violet-50 text-violet-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-violet-100">
+                              Cargado el {formatearFecha(p.createdAt)}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
                           <span className="flex items-center gap-1">
                             <span className="font-bold text-gray-600">RUC:</span> {p.ruc}

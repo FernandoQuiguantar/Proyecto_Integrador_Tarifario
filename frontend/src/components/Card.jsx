@@ -6,21 +6,19 @@ import API_BASE from '../config';
 const API_URL = `${API_BASE}/api/tarifas`;
 
 const CENTROS = ['INMODIAMANTE', 'CONDADO', 'CCI'];
-const TIPOS_DEFAULT = ['Brandeo', 'Comprar Nuevo', 'Mantenimiento', 'Nuevo', 'Servicio'];
+const TIPOS_DEFAULT = ['Brandeo', 'Mantenimiento', 'Nuevo', 'Servicio'];
 const CATEGORIAS_DEFAULT = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 
 const TIPO_COLORS = {
   'Mantenimiento': 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200',
   'Brandeo':       'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200',
   'Nuevo':         'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200',
-  'Comprar Nuevo': 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200',
   'Brandeo/Mantenimiento': 'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200',
 };
 const TIPO_ACTIVE = {
   'Mantenimiento': 'bg-amber-500 text-white border-amber-500',
   'Brandeo':       'bg-blue-600 text-white border-blue-600',
   'Nuevo':         'bg-emerald-600 text-white border-emerald-600',
-  'Comprar Nuevo': 'bg-purple-600 text-white border-purple-600',
   'Brandeo/Mantenimiento': 'bg-cyan-600 text-white border-cyan-600',
 };
 

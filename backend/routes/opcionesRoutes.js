@@ -3,7 +3,7 @@ const router = express.Router();
 const { fn, col, Op } = require('sequelize');
 const Tarifa = require('../models/Tarifa');
 
-const TIPOS_DEFAULT = ['Brandeo', 'Comprar Nuevo', 'Mantenimiento', 'Nuevo', 'Servicio'];
+const TIPOS_DEFAULT = ['Brandeo', 'Mantenimiento', 'Nuevo', 'Servicio'];
 const CATEGORIAS_DEFAULT = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 
 router.get('/cotizacion_tipo', async (req, res) => {

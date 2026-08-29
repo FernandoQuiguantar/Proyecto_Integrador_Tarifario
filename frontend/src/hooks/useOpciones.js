@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import API_BASE from '../config';
 
-const TIPOS_DEFAULT = ['Brandeo', 'Comprar Nuevo', 'Mantenimiento', 'Nuevo', 'Servicio'];
+const TIPOS_DEFAULT = ['Brandeo', 'Mantenimiento', 'Nuevo', 'Servicio'];
 const CATEGORIAS_DEFAULT = ['Elemento iluminado', 'Estructura física', 'Material impreso', 'Piezas por metro cuadrado', 'Servicio'];
 
 export function useOpciones() {
